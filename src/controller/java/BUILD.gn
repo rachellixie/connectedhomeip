@@ -28,6 +28,7 @@ shared_library("jni") {
     "AndroidBleConnectionDelegate.h",
     "AndroidBlePlatformDelegate.cpp",
     "AndroidBlePlatformDelegate.h",
+    "AndroidCommandHandler.cpp",
     "AndroidDeviceControllerWrapper.cpp",
     "AndroidDeviceControllerWrapper.h",
     "AndroidKeyValueStoreManagerImpl.cpp",
@@ -54,12 +55,10 @@ android_library("java") {
 
   sources = [
     "src/chip/devicecontroller/AndroidChipStack.java",
-    "src/chip/devicecontroller/AndroidPersistentStorageDelegate.java",
     "src/chip/devicecontroller/ChipCommandType.java",
     "src/chip/devicecontroller/ChipDeviceController.java",
     "src/chip/devicecontroller/ChipDeviceControllerException.java",
     "src/chip/devicecontroller/KeyValueStoreManager.java",
-    "src/chip/devicecontroller/PersistentStorage.java",
   ]
 
   javac_flags = [ "-Xlint:deprecation" ]

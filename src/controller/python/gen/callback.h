@@ -288,6 +288,14 @@ void emberAfTestClusterClusterInitCallback(chip::EndpointId endpoint);
  */
 void emberAfThermostatClusterInitCallback(chip::EndpointId endpoint);
 
+/** @brief Trusted Root Certificates Cluster Init
+ *
+ * Cluster Init
+ *
+ * @param endpoint    Endpoint that is being initialized
+ */
+void emberAfTrustedRootCertificatesClusterInitCallback(chip::EndpointId endpoint);
+
 /** @brief Wake on LAN Cluster Init
  *
  * Cluster Init
@@ -344,13 +352,13 @@ void emberAfAccountLoginClusterClientManufacturerSpecificAttributeChangedCallbac
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfAccountLoginClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfAccountLoginClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                          EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                          EmberStatus status);
 
@@ -414,15 +422,15 @@ void emberAfApplicationBasicClusterClientManufacturerSpecificAttributeChangedCal
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfApplicationBasicClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
-                                                             EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
-                                                             EmberStatus status);
+void emberAfApplicationBasicClusterClientMessageSentCallback(EmberOutgoingMessageType type,
+                                                             chip::MessageSendDestination destination, EmberApsFrame * apsFrame,
+                                                             uint16_t msgLen, uint8_t * message, EmberStatus status);
 
 /** @brief Application Basic Cluster Client Pre Attribute Changed
  *
@@ -485,15 +493,15 @@ void emberAfApplicationLauncherClusterClientManufacturerSpecificAttributeChanged
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfApplicationLauncherClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
-                                                                EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
-                                                                EmberStatus status);
+void emberAfApplicationLauncherClusterClientMessageSentCallback(EmberOutgoingMessageType type,
+                                                                chip::MessageSendDestination destination, EmberApsFrame * apsFrame,
+                                                                uint16_t msgLen, uint8_t * message, EmberStatus status);
 
 /** @brief Application Launcher Cluster Client Pre Attribute Changed
  *
@@ -556,13 +564,13 @@ void emberAfAudioOutputClusterClientManufacturerSpecificAttributeChangedCallback
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfAudioOutputClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfAudioOutputClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                         EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                         EmberStatus status);
 
@@ -626,13 +634,13 @@ void emberAfBarrierControlClusterClientManufacturerSpecificAttributeChangedCallb
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfBarrierControlClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfBarrierControlClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                            EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                            EmberStatus status);
 
@@ -696,13 +704,13 @@ void emberAfBasicClusterClientManufacturerSpecificAttributeChangedCallback(chip:
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfBasicClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfBasicClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                   EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message, EmberStatus status);
 
 /** @brief Basic Cluster Client Pre Attribute Changed
@@ -765,13 +773,13 @@ void emberAfBindingClusterClientManufacturerSpecificAttributeChangedCallback(chi
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfBindingClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfBindingClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                     EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                     EmberStatus status);
 
@@ -835,13 +843,13 @@ void emberAfColorControlClusterClientManufacturerSpecificAttributeChangedCallbac
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfColorControlClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfColorControlClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                          EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                          EmberStatus status);
 
@@ -905,13 +913,13 @@ void emberAfContentLaunchClusterClientManufacturerSpecificAttributeChangedCallba
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfContentLaunchClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfContentLaunchClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                           EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                           EmberStatus status);
 
@@ -975,13 +983,13 @@ void emberAfDescriptorClusterClientManufacturerSpecificAttributeChangedCallback(
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfDescriptorClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfDescriptorClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                        EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                        EmberStatus status);
 
@@ -1045,13 +1053,13 @@ void emberAfDoorLockClusterClientManufacturerSpecificAttributeChangedCallback(ch
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfDoorLockClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfDoorLockClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                      EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                      EmberStatus status);
 
@@ -1115,15 +1123,15 @@ void emberAfGeneralCommissioningClusterClientManufacturerSpecificAttributeChange
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfGeneralCommissioningClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
-                                                                 EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
-                                                                 EmberStatus status);
+void emberAfGeneralCommissioningClusterClientMessageSentCallback(EmberOutgoingMessageType type,
+                                                                 chip::MessageSendDestination destination, EmberApsFrame * apsFrame,
+                                                                 uint16_t msgLen, uint8_t * message, EmberStatus status);
 
 /** @brief General Commissioning Cluster Client Pre Attribute Changed
  *
@@ -1186,15 +1194,15 @@ void emberAfGroupKeyManagementClusterClientManufacturerSpecificAttributeChangedC
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfGroupKeyManagementClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
-                                                               EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
-                                                               EmberStatus status);
+void emberAfGroupKeyManagementClusterClientMessageSentCallback(EmberOutgoingMessageType type,
+                                                               chip::MessageSendDestination destination, EmberApsFrame * apsFrame,
+                                                               uint16_t msgLen, uint8_t * message, EmberStatus status);
 
 /** @brief Group Key Management Cluster Client Pre Attribute Changed
  *
@@ -1257,13 +1265,13 @@ void emberAfGroupsClusterClientManufacturerSpecificAttributeChangedCallback(chip
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfGroupsClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfGroupsClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                    EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                    EmberStatus status);
 
@@ -1327,13 +1335,13 @@ void emberAfIdentifyClusterClientManufacturerSpecificAttributeChangedCallback(ch
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfIdentifyClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfIdentifyClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                      EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                      EmberStatus status);
 
@@ -1397,13 +1405,13 @@ void emberAfKeypadInputClusterClientManufacturerSpecificAttributeChangedCallback
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfKeypadInputClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfKeypadInputClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                         EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                         EmberStatus status);
 
@@ -1467,13 +1475,13 @@ void emberAfLevelControlClusterClientManufacturerSpecificAttributeChangedCallbac
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfLevelControlClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfLevelControlClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                          EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                          EmberStatus status);
 
@@ -1537,13 +1545,13 @@ void emberAfLowPowerClusterClientManufacturerSpecificAttributeChangedCallback(ch
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfLowPowerClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfLowPowerClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                      EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                      EmberStatus status);
 
@@ -1607,13 +1615,13 @@ void emberAfMediaInputClusterClientManufacturerSpecificAttributeChangedCallback(
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfMediaInputClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfMediaInputClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                        EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                        EmberStatus status);
 
@@ -1677,13 +1685,13 @@ void emberAfMediaPlaybackClusterClientManufacturerSpecificAttributeChangedCallba
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfMediaPlaybackClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfMediaPlaybackClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                           EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                           EmberStatus status);
 
@@ -1747,15 +1755,15 @@ void emberAfNetworkCommissioningClusterClientManufacturerSpecificAttributeChange
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfNetworkCommissioningClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
-                                                                 EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
-                                                                 EmberStatus status);
+void emberAfNetworkCommissioningClusterClientMessageSentCallback(EmberOutgoingMessageType type,
+                                                                 chip::MessageSendDestination destination, EmberApsFrame * apsFrame,
+                                                                 uint16_t msgLen, uint8_t * message, EmberStatus status);
 
 /** @brief Network Commissioning Cluster Client Pre Attribute Changed
  *
@@ -1817,13 +1825,13 @@ void emberAfOnOffClusterClientManufacturerSpecificAttributeChangedCallback(chip:
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfOnOffClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfOnOffClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                   EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message, EmberStatus status);
 
 /** @brief On/off Cluster Client Pre Attribute Changed
@@ -1886,13 +1894,14 @@ void emberAfOperationalCredentialsClusterClientManufacturerSpecificAttributeChan
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfOperationalCredentialsClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfOperationalCredentialsClusterClientMessageSentCallback(EmberOutgoingMessageType type,
+                                                                   chip::MessageSendDestination destination,
                                                                    EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                                    EmberStatus status);
 
@@ -1958,13 +1967,14 @@ void emberAfPumpConfigurationAndControlClusterClientManufacturerSpecificAttribut
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfPumpConfigurationAndControlClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfPumpConfigurationAndControlClusterClientMessageSentCallback(EmberOutgoingMessageType type,
+                                                                        chip::MessageSendDestination destination,
                                                                         EmberApsFrame * apsFrame, uint16_t msgLen,
                                                                         uint8_t * message, EmberStatus status);
 
@@ -2029,13 +2039,13 @@ void emberAfScenesClusterClientManufacturerSpecificAttributeChangedCallback(chip
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfScenesClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfScenesClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                    EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                    EmberStatus status);
 
@@ -2099,13 +2109,13 @@ void emberAfSwitchClusterClientManufacturerSpecificAttributeChangedCallback(chip
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfSwitchClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfSwitchClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                    EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                    EmberStatus status);
 
@@ -2169,13 +2179,13 @@ void emberAfTvChannelClusterClientManufacturerSpecificAttributeChangedCallback(c
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfTvChannelClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfTvChannelClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                       EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                       EmberStatus status);
 
@@ -2239,13 +2249,13 @@ void emberAfTargetNavigatorClusterClientManufacturerSpecificAttributeChangedCall
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfTargetNavigatorClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfTargetNavigatorClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                             EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                             EmberStatus status);
 
@@ -2310,13 +2320,14 @@ void emberAfTemperatureMeasurementClusterClientManufacturerSpecificAttributeChan
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfTemperatureMeasurementClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfTemperatureMeasurementClusterClientMessageSentCallback(EmberOutgoingMessageType type,
+                                                                   chip::MessageSendDestination destination,
                                                                    EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                                    EmberStatus status);
 
@@ -2381,13 +2392,13 @@ void emberAfTestClusterClusterClientManufacturerSpecificAttributeChangedCallback
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfTestClusterClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfTestClusterClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                         EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                         EmberStatus status);
 
@@ -2451,13 +2462,13 @@ void emberAfThermostatClusterClientManufacturerSpecificAttributeChangedCallback(
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfThermostatClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfThermostatClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                        EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                        EmberStatus status);
 
@@ -2482,6 +2493,78 @@ EmberAfStatus emberAfThermostatClusterClientPreAttributeChangedCallback(chip::En
  * @param endpoint  Endpoint that is being served
  */
 void emberAfThermostatClusterClientTickCallback(chip::EndpointId endpoint);
+
+//
+// Trusted Root Certificates Cluster client
+//
+
+/** @brief Trusted Root Certificates Cluster Client Init
+ *
+ * Client Init
+ *
+ * @param endpoint    Endpoint that is being initialized
+ */
+void emberAfTrustedRootCertificatesClusterClientInitCallback(chip::EndpointId endpoint);
+
+/** @brief Trusted Root Certificates Cluster Client Attribute Changed
+ *
+ * Client Attribute Changed
+ *
+ * @param endpoint    Endpoint that is being initialized
+ * @param attributeId Attribute that changed
+ */
+void emberAfTrustedRootCertificatesClusterClientAttributeChangedCallback(chip::EndpointId endpoint, chip::AttributeId attributeId);
+
+/** @brief Trusted Root Certificates Cluster Client Manufacturer Specific Attribute Changed
+ *
+ * Client Manufacturer Specific Attribute Changed
+ *
+ * @param endpoint          Endpoint that is being initialized
+ * @param attributeId       Attribute that changed
+ * @param manufacturerCode  Manufacturer Code of the attribute that changed
+ */
+void emberAfTrustedRootCertificatesClusterClientManufacturerSpecificAttributeChangedCallback(chip::EndpointId endpoint,
+                                                                                             chip::AttributeId attributeId,
+                                                                                             uint16_t manufacturerCode);
+
+/** @brief Trusted Root Certificates Cluster Client Message Sent
+ *
+ * Client Message Sent
+ *
+ * @param type               The type of message sent
+ * @param destination        The destination to which the message was sent
+ * @param apsFrame           The APS frame for the message
+ * @param msgLen             The length of the message
+ * @param message            The message that was sent
+ * @param status             The status of the sent message
+ */
+void emberAfTrustedRootCertificatesClusterClientMessageSentCallback(EmberOutgoingMessageType type,
+                                                                    chip::MessageSendDestination destination,
+                                                                    EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
+                                                                    EmberStatus status);
+
+/** @brief Trusted Root Certificates Cluster Client Pre Attribute Changed
+ *
+ * client Pre Attribute Changed
+ *
+ * @param endpoint      Endpoint that is being initialized
+ * @param attributeId   Attribute to be changed
+ * @param attributeType Attribute type
+ * @param size          Attribute size
+ * @param value         Attribute value
+ */
+EmberAfStatus emberAfTrustedRootCertificatesClusterClientPreAttributeChangedCallback(chip::EndpointId endpoint,
+                                                                                     chip::AttributeId attributeId,
+                                                                                     EmberAfAttributeType attributeType,
+                                                                                     uint16_t size, uint8_t * value);
+
+/** @brief Trusted Root Certificates Cluster Client Tick
+ *
+ * client Tick
+ *
+ * @param endpoint  Endpoint that is being served
+ */
+void emberAfTrustedRootCertificatesClusterClientTickCallback(chip::EndpointId endpoint);
 
 //
 // Wake on LAN Cluster client
@@ -2521,13 +2604,13 @@ void emberAfWakeOnLanClusterClientManufacturerSpecificAttributeChangedCallback(c
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfWakeOnLanClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfWakeOnLanClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                       EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                       EmberStatus status);
 
@@ -2591,13 +2674,13 @@ void emberAfWindowCoveringClusterClientManufacturerSpecificAttributeChangedCallb
  * Client Message Sent
  *
  * @param type               The type of message sent
- * @param indexOrDestination The destination or address to which the message was sent
+ * @param destination        The destination to which the message was sent
  * @param apsFrame           The APS frame for the message
  * @param msgLen             The length of the message
  * @param message            The message that was sent
  * @param status             The status of the sent message
  */
-void emberAfWindowCoveringClusterClientMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination,
+void emberAfWindowCoveringClusterClientMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination,
                                                            EmberApsFrame * apsFrame, uint16_t msgLen, uint8_t * message,
                                                            EmberStatus status);
 
@@ -2628,23 +2711,18 @@ void emberAfWindowCoveringClusterClientTickCallback(chip::EndpointId endpoint);
 
 /**
  * @brief Account Login Cluster GetSetupPINResponse Command callback
- * @param setupPIN
  */
 
 bool emberAfAccountLoginClusterGetSetupPINResponseCallback(chip::app::Command * commandObj, uint8_t * setupPIN);
 
 /**
  * @brief Application Launcher Cluster LaunchAppResponse Command callback
- * @param status
- * @param data
  */
 
 bool emberAfApplicationLauncherClusterLaunchAppResponseCallback(chip::app::Command * commandObj, uint8_t status, uint8_t * data);
 
 /**
  * @brief Content Launch Cluster LaunchContentResponse Command callback
- * @param data
- * @param contentLaunchStatus
  */
 
 bool emberAfContentLaunchClusterLaunchContentResponseCallback(chip::app::Command * commandObj, uint8_t * data,
@@ -2652,8 +2730,6 @@ bool emberAfContentLaunchClusterLaunchContentResponseCallback(chip::app::Command
 
 /**
  * @brief Content Launch Cluster LaunchURLResponse Command callback
- * @param data
- * @param contentLaunchStatus
  */
 
 bool emberAfContentLaunchClusterLaunchURLResponseCallback(chip::app::Command * commandObj, uint8_t * data,
@@ -2661,60 +2737,48 @@ bool emberAfContentLaunchClusterLaunchURLResponseCallback(chip::app::Command * c
 
 /**
  * @brief Door Lock Cluster ClearAllPinsResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterClearAllPinsResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster ClearAllRfidsResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterClearAllRfidsResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster ClearHolidayScheduleResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterClearHolidayScheduleResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster ClearPinResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterClearPinResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster ClearRfidResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterClearRfidResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster ClearWeekdayScheduleResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterClearWeekdayScheduleResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster ClearYeardayScheduleResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterClearYeardayScheduleResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster GetHolidayScheduleResponse Command callback
- * @param scheduleId
- * @param status
- * @param localStartTime
- * @param localEndTime
- * @param operatingModeDuringHoliday
  */
 
 bool emberAfDoorLockClusterGetHolidayScheduleResponseCallback(chip::app::Command * commandObj, uint8_t scheduleId, uint8_t status,
@@ -2723,13 +2787,6 @@ bool emberAfDoorLockClusterGetHolidayScheduleResponseCallback(chip::app::Command
 
 /**
  * @brief Door Lock Cluster GetLogRecordResponse Command callback
- * @param logEntryId
- * @param timestamp
- * @param eventType
- * @param source
- * @param eventIdOrAlarmCode
- * @param userId
- * @param pin
  */
 
 bool emberAfDoorLockClusterGetLogRecordResponseCallback(chip::app::Command * commandObj, uint16_t logEntryId, uint32_t timestamp,
@@ -2738,10 +2795,6 @@ bool emberAfDoorLockClusterGetLogRecordResponseCallback(chip::app::Command * com
 
 /**
  * @brief Door Lock Cluster GetPinResponse Command callback
- * @param userId
- * @param userStatus
- * @param userType
- * @param pin
  */
 
 bool emberAfDoorLockClusterGetPinResponseCallback(chip::app::Command * commandObj, uint16_t userId, uint8_t userStatus,
@@ -2749,10 +2802,6 @@ bool emberAfDoorLockClusterGetPinResponseCallback(chip::app::Command * commandOb
 
 /**
  * @brief Door Lock Cluster GetRfidResponse Command callback
- * @param userId
- * @param userStatus
- * @param userType
- * @param rfid
  */
 
 bool emberAfDoorLockClusterGetRfidResponseCallback(chip::app::Command * commandObj, uint16_t userId, uint8_t userStatus,
@@ -2760,22 +2809,12 @@ bool emberAfDoorLockClusterGetRfidResponseCallback(chip::app::Command * commandO
 
 /**
  * @brief Door Lock Cluster GetUserTypeResponse Command callback
- * @param userId
- * @param userType
  */
 
 bool emberAfDoorLockClusterGetUserTypeResponseCallback(chip::app::Command * commandObj, uint16_t userId, uint8_t userType);
 
 /**
  * @brief Door Lock Cluster GetWeekdayScheduleResponse Command callback
- * @param scheduleId
- * @param userId
- * @param status
- * @param daysMask
- * @param startHour
- * @param startMinute
- * @param endHour
- * @param endMinute
  */
 
 bool emberAfDoorLockClusterGetWeekdayScheduleResponseCallback(chip::app::Command * commandObj, uint8_t scheduleId, uint16_t userId,
@@ -2784,11 +2823,6 @@ bool emberAfDoorLockClusterGetWeekdayScheduleResponseCallback(chip::app::Command
 
 /**
  * @brief Door Lock Cluster GetYeardayScheduleResponse Command callback
- * @param scheduleId
- * @param userId
- * @param status
- * @param localStartTime
- * @param localEndTime
  */
 
 bool emberAfDoorLockClusterGetYeardayScheduleResponseCallback(chip::app::Command * commandObj, uint8_t scheduleId, uint16_t userId,
@@ -2796,71 +2830,60 @@ bool emberAfDoorLockClusterGetYeardayScheduleResponseCallback(chip::app::Command
 
 /**
  * @brief Door Lock Cluster LockDoorResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterLockDoorResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster SetHolidayScheduleResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterSetHolidayScheduleResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster SetPinResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterSetPinResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster SetRfidResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterSetRfidResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster SetUserTypeResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterSetUserTypeResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster SetWeekdayScheduleResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterSetWeekdayScheduleResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster SetYeardayScheduleResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterSetYeardayScheduleResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster UnlockDoorResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterUnlockDoorResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Door Lock Cluster UnlockWithTimeoutResponse Command callback
- * @param status
  */
 
 bool emberAfDoorLockClusterUnlockWithTimeoutResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief General Commissioning Cluster ArmFailSafeResponse Command callback
- * @param errorCode
- * @param debugText
  */
 
 bool emberAfGeneralCommissioningClusterArmFailSafeResponseCallback(chip::app::Command * commandObj, uint8_t errorCode,
@@ -2868,8 +2891,6 @@ bool emberAfGeneralCommissioningClusterArmFailSafeResponseCallback(chip::app::Co
 
 /**
  * @brief General Commissioning Cluster CommissioningCompleteResponse Command callback
- * @param errorCode
- * @param debugText
  */
 
 bool emberAfGeneralCommissioningClusterCommissioningCompleteResponseCallback(chip::app::Command * commandObj, uint8_t errorCode,
@@ -2877,8 +2898,6 @@ bool emberAfGeneralCommissioningClusterCommissioningCompleteResponseCallback(chi
 
 /**
  * @brief General Commissioning Cluster SetRegulatoryConfigResponse Command callback
- * @param errorCode
- * @param debugText
  */
 
 bool emberAfGeneralCommissioningClusterSetRegulatoryConfigResponseCallback(chip::app::Command * commandObj, uint8_t errorCode,
@@ -2886,17 +2905,12 @@ bool emberAfGeneralCommissioningClusterSetRegulatoryConfigResponseCallback(chip:
 
 /**
  * @brief Groups Cluster AddGroupResponse Command callback
- * @param status
- * @param groupId
  */
 
 bool emberAfGroupsClusterAddGroupResponseCallback(chip::app::Command * commandObj, uint8_t status, uint16_t groupId);
 
 /**
  * @brief Groups Cluster GetGroupMembershipResponse Command callback
- * @param capacity
- * @param groupCount
- * @param groupList
  */
 
 bool emberAfGroupsClusterGetGroupMembershipResponseCallback(chip::app::Command * commandObj, uint8_t capacity, uint8_t groupCount,
@@ -2904,17 +2918,12 @@ bool emberAfGroupsClusterGetGroupMembershipResponseCallback(chip::app::Command *
 
 /**
  * @brief Groups Cluster RemoveGroupResponse Command callback
- * @param status
- * @param groupId
  */
 
 bool emberAfGroupsClusterRemoveGroupResponseCallback(chip::app::Command * commandObj, uint8_t status, uint16_t groupId);
 
 /**
  * @brief Groups Cluster ViewGroupResponse Command callback
- * @param status
- * @param groupId
- * @param groupName
  */
 
 bool emberAfGroupsClusterViewGroupResponseCallback(chip::app::Command * commandObj, uint8_t status, uint16_t groupId,
@@ -2922,99 +2931,84 @@ bool emberAfGroupsClusterViewGroupResponseCallback(chip::app::Command * commandO
 
 /**
  * @brief Identify Cluster IdentifyQueryResponse Command callback
- * @param timeout
  */
 
 bool emberAfIdentifyClusterIdentifyQueryResponseCallback(chip::app::Command * commandObj, uint16_t timeout);
 
 /**
  * @brief Keypad Input Cluster SendKeyResponse Command callback
- * @param status
  */
 
 bool emberAfKeypadInputClusterSendKeyResponseCallback(chip::app::Command * commandObj, uint8_t status);
 
 /**
  * @brief Media Playback Cluster MediaFastForwardResponse Command callback
- * @param mediaPlaybackStatus
  */
 
 bool emberAfMediaPlaybackClusterMediaFastForwardResponseCallback(chip::app::Command * commandObj, uint8_t mediaPlaybackStatus);
 
 /**
  * @brief Media Playback Cluster MediaNextResponse Command callback
- * @param mediaPlaybackStatus
  */
 
 bool emberAfMediaPlaybackClusterMediaNextResponseCallback(chip::app::Command * commandObj, uint8_t mediaPlaybackStatus);
 
 /**
  * @brief Media Playback Cluster MediaPauseResponse Command callback
- * @param mediaPlaybackStatus
  */
 
 bool emberAfMediaPlaybackClusterMediaPauseResponseCallback(chip::app::Command * commandObj, uint8_t mediaPlaybackStatus);
 
 /**
  * @brief Media Playback Cluster MediaPlayResponse Command callback
- * @param mediaPlaybackStatus
  */
 
 bool emberAfMediaPlaybackClusterMediaPlayResponseCallback(chip::app::Command * commandObj, uint8_t mediaPlaybackStatus);
 
 /**
  * @brief Media Playback Cluster MediaPreviousResponse Command callback
- * @param mediaPlaybackStatus
  */
 
 bool emberAfMediaPlaybackClusterMediaPreviousResponseCallback(chip::app::Command * commandObj, uint8_t mediaPlaybackStatus);
 
 /**
  * @brief Media Playback Cluster MediaRewindResponse Command callback
- * @param mediaPlaybackStatus
  */
 
 bool emberAfMediaPlaybackClusterMediaRewindResponseCallback(chip::app::Command * commandObj, uint8_t mediaPlaybackStatus);
 
 /**
  * @brief Media Playback Cluster MediaSkipBackwardResponse Command callback
- * @param mediaPlaybackStatus
  */
 
 bool emberAfMediaPlaybackClusterMediaSkipBackwardResponseCallback(chip::app::Command * commandObj, uint8_t mediaPlaybackStatus);
 
 /**
  * @brief Media Playback Cluster MediaSkipForwardResponse Command callback
- * @param mediaPlaybackStatus
  */
 
 bool emberAfMediaPlaybackClusterMediaSkipForwardResponseCallback(chip::app::Command * commandObj, uint8_t mediaPlaybackStatus);
 
 /**
  * @brief Media Playback Cluster MediaSkipSeekResponse Command callback
- * @param mediaPlaybackStatus
  */
 
 bool emberAfMediaPlaybackClusterMediaSkipSeekResponseCallback(chip::app::Command * commandObj, uint8_t mediaPlaybackStatus);
 
 /**
  * @brief Media Playback Cluster MediaStartOverResponse Command callback
- * @param mediaPlaybackStatus
  */
 
 bool emberAfMediaPlaybackClusterMediaStartOverResponseCallback(chip::app::Command * commandObj, uint8_t mediaPlaybackStatus);
 
 /**
  * @brief Media Playback Cluster MediaStopResponse Command callback
- * @param mediaPlaybackStatus
  */
 
 bool emberAfMediaPlaybackClusterMediaStopResponseCallback(chip::app::Command * commandObj, uint8_t mediaPlaybackStatus);
 
 /**
  * @brief Network Commissioning Cluster AddThreadNetworkResponse Command callback
- * @param errorCode
- * @param debugText
  */
 
 bool emberAfNetworkCommissioningClusterAddThreadNetworkResponseCallback(chip::app::Command * commandObj, uint8_t errorCode,
@@ -3022,8 +3016,6 @@ bool emberAfNetworkCommissioningClusterAddThreadNetworkResponseCallback(chip::ap
 
 /**
  * @brief Network Commissioning Cluster AddWiFiNetworkResponse Command callback
- * @param errorCode
- * @param debugText
  */
 
 bool emberAfNetworkCommissioningClusterAddWiFiNetworkResponseCallback(chip::app::Command * commandObj, uint8_t errorCode,
@@ -3031,8 +3023,6 @@ bool emberAfNetworkCommissioningClusterAddWiFiNetworkResponseCallback(chip::app:
 
 /**
  * @brief Network Commissioning Cluster DisableNetworkResponse Command callback
- * @param errorCode
- * @param debugText
  */
 
 bool emberAfNetworkCommissioningClusterDisableNetworkResponseCallback(chip::app::Command * commandObj, uint8_t errorCode,
@@ -3040,8 +3030,6 @@ bool emberAfNetworkCommissioningClusterDisableNetworkResponseCallback(chip::app:
 
 /**
  * @brief Network Commissioning Cluster EnableNetworkResponse Command callback
- * @param errorCode
- * @param debugText
  */
 
 bool emberAfNetworkCommissioningClusterEnableNetworkResponseCallback(chip::app::Command * commandObj, uint8_t errorCode,
@@ -3049,8 +3037,6 @@ bool emberAfNetworkCommissioningClusterEnableNetworkResponseCallback(chip::app::
 
 /**
  * @brief Network Commissioning Cluster RemoveNetworkResponse Command callback
- * @param errorCode
- * @param debugText
  */
 
 bool emberAfNetworkCommissioningClusterRemoveNetworkResponseCallback(chip::app::Command * commandObj, uint8_t errorCode,
@@ -3058,10 +3044,6 @@ bool emberAfNetworkCommissioningClusterRemoveNetworkResponseCallback(chip::app::
 
 /**
  * @brief Network Commissioning Cluster ScanNetworksResponse Command callback
- * @param errorCode
- * @param debugText
- * @param wifiScanResults
- * @param threadScanResults
  */
 
 bool emberAfNetworkCommissioningClusterScanNetworksResponseCallback(
@@ -3071,8 +3053,6 @@ bool emberAfNetworkCommissioningClusterScanNetworksResponseCallback(
 
 /**
  * @brief Network Commissioning Cluster UpdateThreadNetworkResponse Command callback
- * @param errorCode
- * @param debugText
  */
 
 bool emberAfNetworkCommissioningClusterUpdateThreadNetworkResponseCallback(chip::app::Command * commandObj, uint8_t errorCode,
@@ -3080,25 +3060,35 @@ bool emberAfNetworkCommissioningClusterUpdateThreadNetworkResponseCallback(chip:
 
 /**
  * @brief Network Commissioning Cluster UpdateWiFiNetworkResponse Command callback
- * @param errorCode
- * @param debugText
  */
 
 bool emberAfNetworkCommissioningClusterUpdateWiFiNetworkResponseCallback(chip::app::Command * commandObj, uint8_t errorCode,
                                                                          uint8_t * debugText);
 
 /**
+ * @brief Operational Credentials Cluster OpCSRResponse Command callback
+ */
+
+bool emberAfOperationalCredentialsClusterOpCSRResponseCallback(chip::app::Command * commandObj, chip::ByteSpan CSR,
+                                                               chip::ByteSpan CSRNonce, chip::ByteSpan VendorReserved1,
+                                                               chip::ByteSpan VendorReserved2, chip::ByteSpan VendorReserved3,
+                                                               chip::ByteSpan Signature);
+
+/**
+ * @brief Operational Credentials Cluster OpCertResponse Command callback
+ */
+
+bool emberAfOperationalCredentialsClusterOpCertResponseCallback(chip::app::Command * commandObj, uint8_t StatusCode,
+                                                                uint64_t FabricIndex, uint8_t * DebugText);
+
+/**
  * @brief Operational Credentials Cluster SetFabricResponse Command callback
- * @param fabricId
  */
 
 bool emberAfOperationalCredentialsClusterSetFabricResponseCallback(chip::app::Command * commandObj, chip::FabricId FabricId);
 
 /**
  * @brief Scenes Cluster AddSceneResponse Command callback
- * @param status
- * @param groupId
- * @param sceneId
  */
 
 bool emberAfScenesClusterAddSceneResponseCallback(chip::app::Command * commandObj, uint8_t status, uint16_t groupId,
@@ -3106,11 +3096,6 @@ bool emberAfScenesClusterAddSceneResponseCallback(chip::app::Command * commandOb
 
 /**
  * @brief Scenes Cluster GetSceneMembershipResponse Command callback
- * @param status
- * @param capacity
- * @param groupId
- * @param sceneCount
- * @param sceneList
  */
 
 bool emberAfScenesClusterGetSceneMembershipResponseCallback(chip::app::Command * commandObj, uint8_t status, uint8_t capacity,
@@ -3119,17 +3104,12 @@ bool emberAfScenesClusterGetSceneMembershipResponseCallback(chip::app::Command *
 
 /**
  * @brief Scenes Cluster RemoveAllScenesResponse Command callback
- * @param status
- * @param groupId
  */
 
 bool emberAfScenesClusterRemoveAllScenesResponseCallback(chip::app::Command * commandObj, uint8_t status, uint16_t groupId);
 
 /**
  * @brief Scenes Cluster RemoveSceneResponse Command callback
- * @param status
- * @param groupId
- * @param sceneId
  */
 
 bool emberAfScenesClusterRemoveSceneResponseCallback(chip::app::Command * commandObj, uint8_t status, uint16_t groupId,
@@ -3137,9 +3117,6 @@ bool emberAfScenesClusterRemoveSceneResponseCallback(chip::app::Command * comman
 
 /**
  * @brief Scenes Cluster StoreSceneResponse Command callback
- * @param status
- * @param groupId
- * @param sceneId
  */
 
 bool emberAfScenesClusterStoreSceneResponseCallback(chip::app::Command * commandObj, uint8_t status, uint16_t groupId,
@@ -3147,12 +3124,6 @@ bool emberAfScenesClusterStoreSceneResponseCallback(chip::app::Command * command
 
 /**
  * @brief Scenes Cluster ViewSceneResponse Command callback
- * @param status
- * @param groupId
- * @param sceneId
- * @param transitionTime
- * @param sceneName
- * @param extensionFieldSets
  */
 
 bool emberAfScenesClusterViewSceneResponseCallback(chip::app::Command * commandObj, uint8_t status, uint16_t groupId,
@@ -3161,8 +3132,6 @@ bool emberAfScenesClusterViewSceneResponseCallback(chip::app::Command * commandO
 
 /**
  * @brief TV Channel Cluster ChangeChannelResponse Command callback
- * @param channelMatch
- * @param errorType
  */
 
 bool emberAfTvChannelClusterChangeChannelResponseCallback(chip::app::Command * commandObj,
@@ -3171,15 +3140,12 @@ bool emberAfTvChannelClusterChangeChannelResponseCallback(chip::app::Command * c
 
 /**
  * @brief Target Navigator Cluster NavigateTargetResponse Command callback
- * @param status
- * @param data
  */
 
 bool emberAfTargetNavigatorClusterNavigateTargetResponseCallback(chip::app::Command * commandObj, uint8_t status, uint8_t * data);
 
 /**
  * @brief Test Cluster Cluster TestSpecificResponse Command callback
- * @param returnValue
  */
 
 bool emberAfTestClusterClusterTestSpecificResponseCallback(chip::app::Command * commandObj, uint8_t returnValue);
@@ -3425,13 +3391,13 @@ bool emberAfPreMessageSendCallback(EmberAfMessageStruct * messageStruct, EmberSt
  * be handled by the application framework.
  *
  * @param type   Ver.: always
- * @param indexOrDestination   Ver.: always
+ * @param destination   Ver.: always
  * @param apsFrame   Ver.: always
  * @param msgLen   Ver.: always
  * @param message   Ver.: always
  * @param status   Ver.: always
  */
-bool emberAfMessageSentCallback(EmberOutgoingMessageType type, uint64_t indexOrDestination, EmberApsFrame * apsFrame,
+bool emberAfMessageSentCallback(EmberOutgoingMessageType type, chip::MessageSendDestination destination, EmberApsFrame * apsFrame,
                                 uint16_t msgLen, uint8_t * message, EmberStatus status);
 
 /** @brief Pre Attribute Change

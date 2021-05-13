@@ -686,6 +686,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface CHIPOperationalCredentials : CHIPCluster
 
+- (void)removeAllFabrics:(ResponseHandler)responseHandler;
 - (void)removeFabric:(uint64_t)fabricId
               nodeId:(uint64_t)nodeId
             vendorId:(uint16_t)vendorId
@@ -864,6 +865,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)readAttributeOctetStringWithResponseHandler:(ResponseHandler)responseHandler;
 - (void)writeAttributeOctetStringWithValue:(NSData *)value responseHandler:(ResponseHandler)responseHandler;
 - (void)readAttributeListInt8uWithResponseHandler:(ResponseHandler)responseHandler;
+- (void)readAttributeListOctetStringWithResponseHandler:(ResponseHandler)responseHandler;
+- (void)readAttributeListStructOctetStringWithResponseHandler:(ResponseHandler)responseHandler;
 - (void)readAttributeClusterRevisionWithResponseHandler:(ResponseHandler)responseHandler;
 
 @end

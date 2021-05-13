@@ -55,10 +55,10 @@ public:
 
     enum class CommandState
     {
-        Uninitialized = 0, //< The invoke command message has not been initialized
-        Initialized,       //< The invoke command message has been initialized and is ready
-        AddCommand,        //< The invoke command message has added Command
-        Sending,           //< The invoke command message  has sent out the invoke command
+        Uninitialized = 0, ///< The invoke command message has not been initialized
+        Initialized,       ///< The invoke command message has been initialized and is ready
+        AddCommand,        ///< The invoke command message has added Command
+        Sending,           ///< The invoke command message has sent out the invoke command
     };
 
     /**
@@ -109,7 +109,7 @@ public:
      *         exchange context has been assigned or the context
      *         has been released.
      */
-    const Messaging::ExchangeContext * GetExchangeContext() const { return mpExchangeCtx; }
+    Messaging::ExchangeContext * GetExchangeContext() const { return mpExchangeCtx; }
 
     CHIP_ERROR Reset();
 

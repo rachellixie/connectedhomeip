@@ -27,6 +27,7 @@
 #include <lib/core/PeerId.h>
 #include <platform/CHIPDeviceLayer.h>
 #include <support/CodeUtils.h>
+#include <support/ScopedBuffer.h>
 #include <support/logging/CHIPLogging.h>
 #include <transport/AdminPairingTable.h>
 
@@ -145,9 +146,9 @@ CHIP_ERROR writeAdminsIntoFabricsListAttribute()
  * fields to find the current admin. Once addOptCert and fabric index are implemented, remove all this and use fabricIndex.
  */
 
-AdminPairingInfo * retrieveCurrentAdmin()
+static AdminPairingInfo * retrieveCurrentAdmin()
 {
-    uint64_t fabricId = emberAfCurrentCommand()->source;
+    uint64_t fabricId = emberAfCurrentCommand()->SourceNodeId();
     // TODO: Figure out how to get device node id so we can do FindAdminForNode(fabricId, nodeId)...
     emberAfPrintln(EMBER_AF_PRINT_DEBUG, "OpCreds: Finding admin with fabricId  %" PRIX64 ".", fabricId);
     return GetGlobalAdminPairingTable().FindAdminForNode(fabricId);
@@ -208,7 +209,7 @@ bool emberAfOperationalCredentialsClusterRemoveFabricCallback(chip::app::Command
     EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
     AdminPairingInfo * admin;
     AdminId adminId;
-    CHIP_ERROR err;
+    CHIP_ERROR err = CHIP_NO_ERROR;
 
     // Fetch matching admin
     admin = GetGlobalAdminPairingTable().FindAdminForNode(fabricId, nodeId, vendorId);
@@ -232,7 +233,7 @@ bool emberAfOperationalCredentialsClusterSetFabricCallback(chip::app::Command * 
 
     EmberAfStatus status   = EMBER_ZCL_STATUS_SUCCESS;
     EmberStatus sendStatus = EMBER_SUCCESS;
-    CHIP_ERROR err;
+    CHIP_ERROR err         = CHIP_NO_ERROR;
 
     // Fetch current admin
     AdminPairingInfo * admin = retrieveCurrentAdmin();
@@ -244,12 +245,28 @@ bool emberAfOperationalCredentialsClusterSetFabricCallback(chip::app::Command * 
     err = GetGlobalAdminPairingTable().Store(admin->GetAdminId());
     VerifyOrExit(err == CHIP_NO_ERROR, status = EMBER_ZCL_STATUS_FAILURE);
 
-    // Return FabricId - we are temporarily using commissioner nodeId (retrieved via emberAfCurrentCommand()->source) as fabricId
-    // until addOptCert + fabricIndex are implemented. Once they are, this method and its response will go away.
-    emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT),
-                              ZCL_OPERATIONAL_CREDENTIALS_CLUSTER_ID, ZCL_SET_FABRIC_RESPONSE_COMMAND_ID, "y",
-                              emberAfCurrentCommand()->source);
-    sendStatus = emberAfSendResponse();
+    // Return FabricId - we are temporarily using commissioner nodeId (retrieved via emberAfCurrentCommand()->SourceNodeId()) as
+    // fabricId until addOptCert + fabricIndex are implemented. Once they are, this method and its response will go away.
+    if (commandObj == nullptr)
+    {
+        emberAfFillExternalBuffer((ZCL_CLUSTER_SPECIFIC_COMMAND | ZCL_FRAME_CONTROL_SERVER_TO_CLIENT),
+                                  ZCL_OPERATIONAL_CREDENTIALS_CLUSTER_ID, ZCL_SET_FABRIC_RESPONSE_COMMAND_ID, "y",
+                                  emberAfCurrentCommand()->SourceNodeId());
+        sendStatus = emberAfSendResponse();
+    }
+    else
+    {
+        app::CommandPathParams cmdParams = { emberAfCurrentEndpoint(), /* group id */ 0, ZCL_OPERATIONAL_CREDENTIALS_CLUSTER_ID,
+                                             ZCL_SET_FABRIC_RESPONSE_COMMAND_ID, (chip::app::CommandPathFlags::kEndpointIdValid) };
+        TLV::TLVWriter * writer          = nullptr;
+
+        VerifyOrExit(commandObj != nullptr, err = CHIP_ERROR_INCORRECT_STATE);
+
+        SuccessOrExit(err = commandObj->PrepareCommand(&cmdParams));
+        writer = commandObj->GetCommandDataElementTLVWriter();
+        SuccessOrExit(err = writer->Put(TLV::ContextTag(0), commandObj->GetExchangeContext()->GetSecureSession().GetPeerNodeId()));
+        SuccessOrExit(err = commandObj->FinishCommand());
+    }
 
 exit:
     if (status == EMBER_ZCL_STATUS_FAILURE)
@@ -261,6 +278,10 @@ exit:
     {
         emberAfPrintln(EMBER_AF_PRINT_DEBUG, "OpCreds: Failed to send %s response: 0x%x", "set_fabric", sendStatus);
     }
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(Zcl, "Failed to encode response command: %s", ErrorStr(err));
+    }
 
     return true;
 }
@@ -269,6 +290,129 @@ bool emberAfOperationalCredentialsClusterUpdateFabricLabelCallback(chip::app::Co
 {
     emberAfPrintln(EMBER_AF_PRINT_DEBUG, "OpCreds: UpdateFabricLabel");
 
+    EmberAfStatus status = EMBER_ZCL_STATUS_FAILURE;
+    emberAfSendImmediateDefaultResponse(status);
+    return true;
+}
+
+namespace {
+void DoRemoveAllFabrics(intptr_t)
+{
+    OpenDefaultPairingWindow(ResetAdmins::kYes);
+}
+} // namespace
+
+// Up for discussion in Multi-Admin TT: chip-spec:#2891
+bool emberAfOperationalCredentialsClusterRemoveAllFabricsCallback(chip::app::Command * commandObj)
+{
+    emberAfPrintln(EMBER_AF_PRINT_DEBUG, "OpCreds: Remove all Fabrics");
+    PlatformMgr().ScheduleWork(DoRemoveAllFabrics, 0);
+    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+    return true;
+}
+
+bool emberAfOperationalCredentialsClusterAddOpCertCallback(chip::app::Command * commandObj, chip::ByteSpan NOC,
+                                                           chip::ByteSpan ICACertificate, chip::ByteSpan IPKValue,
+                                                           chip::NodeId CaseAdminNode, uint16_t AdminVendorId)
+{
+    EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
+
+    chip::Platform::ScopedMemoryBuffer<uint8_t> cert;
+
+    uint8_t * certBuf = nullptr;
+
+    emberAfPrintln(EMBER_AF_PRINT_DEBUG, "OpCreds: commissioner has added an Op Cert");
+
+    AdminPairingInfo * admin = retrieveCurrentAdmin();
+    VerifyOrExit(admin != nullptr, status = EMBER_ZCL_STATUS_FAILURE);
+
+    // TODO - Update ZAP to use 16 bit length for OCTET_STRING. This is a temporary hack, as OCTET_STRING only supports 8 bit
+    // strings. We are currently spilling over NOC into ICACertificate argument.
+    VerifyOrExit(cert.Alloc(NOC.size() + ICACertificate.size()), status = EMBER_ZCL_STATUS_FAILURE);
+    certBuf = cert.Get();
+    memcpy(certBuf, NOC.data(), NOC.size());
+    memcpy(&certBuf[NOC.size()], ICACertificate.data(), ICACertificate.size());
+
+    VerifyOrExit(admin->SetOperationalCert(ByteSpan(certBuf, NOC.size() + ICACertificate.size())) == CHIP_NO_ERROR,
+                 status = EMBER_ZCL_STATUS_FAILURE);
+
+exit:
+    emberAfSendImmediateDefaultResponse(status);
+    if (status == EMBER_ZCL_STATUS_FAILURE)
+    {
+        emberAfPrintln(EMBER_AF_PRINT_DEBUG, "OpCreds: Failed AddOpCert request.");
+    }
+
+    return true;
+}
+
+bool emberAfOperationalCredentialsClusterOpCSRRequestCallback(chip::app::Command * commandObj, chip::ByteSpan CSRNonce)
+{
+    EmberAfStatus status   = EMBER_ZCL_STATUS_SUCCESS;
+    EmberStatus sendStatus = EMBER_SUCCESS;
+    CHIP_ERROR err         = CHIP_NO_ERROR;
+
+    chip::Platform::ScopedMemoryBuffer<uint8_t> csr;
+    size_t csrLength = Crypto::kMAX_CSR_Length;
+
+    emberAfPrintln(EMBER_AF_PRINT_DEBUG, "OpCreds: commissioner has requested an OpCSR");
+
+    app::CommandPathParams cmdParams = { emberAfCurrentEndpoint(), /* group id */ 0, ZCL_OPERATIONAL_CREDENTIALS_CLUSTER_ID,
+                                         ZCL_OP_CSR_RESPONSE_COMMAND_ID, (chip::app::CommandPathFlags::kEndpointIdValid) };
+
+    TLV::TLVWriter * writer = nullptr;
+
+    // Fetch current admin
+    AdminPairingInfo * admin = retrieveCurrentAdmin();
+    VerifyOrExit(admin != nullptr, status = EMBER_ZCL_STATUS_FAILURE);
+
+    VerifyOrExit(csr.Alloc(Crypto::kMAX_CSR_Length), status = EMBER_ZCL_STATUS_FAILURE);
+
+    if (admin->GetOperationalKey() == nullptr)
+    {
+        Crypto::P256Keypair keypair;
+        keypair.Initialize();
+        VerifyOrExit(admin->SetOperationalKey(keypair) == CHIP_NO_ERROR, status = EMBER_ZCL_STATUS_FAILURE);
+    }
+
+    err = admin->GetOperationalKey()->NewCertificateSigningRequest(csr.Get(), csrLength);
+    emberAfPrintln(EMBER_AF_PRINT_DEBUG, "OpCreds: NewCertificateSigningRequest returned %d", err);
+    VerifyOrExit(err == CHIP_NO_ERROR, status = EMBER_ZCL_STATUS_FAILURE);
+    VerifyOrExit(csrLength < UINT8_MAX, status = EMBER_ZCL_STATUS_FAILURE);
+
+    VerifyOrExit(commandObj != nullptr, err = CHIP_ERROR_INCORRECT_STATE);
+
+    SuccessOrExit(err = commandObj->PrepareCommand(&cmdParams));
+    writer = commandObj->GetCommandDataElementTLVWriter();
+    SuccessOrExit(err = writer->Put(TLV::ContextTag(0), ByteSpan(csr.Get(), csrLength)));
+    SuccessOrExit(err = writer->Put(TLV::ContextTag(1), CSRNonce));
+    SuccessOrExit(err = writer->Put(TLV::ContextTag(2), ByteSpan(nullptr, 0)));
+    SuccessOrExit(err = writer->Put(TLV::ContextTag(3), ByteSpan(nullptr, 0)));
+    SuccessOrExit(err = writer->Put(TLV::ContextTag(4), ByteSpan(nullptr, 0)));
+    SuccessOrExit(err = writer->Put(TLV::ContextTag(5), ByteSpan(nullptr, 0)));
+    SuccessOrExit(err = commandObj->FinishCommand());
+
+exit:
+    if (status == EMBER_ZCL_STATUS_FAILURE)
+    {
+        emberAfPrintln(EMBER_AF_PRINT_DEBUG, "OpCreds: Failed OpCSRRequest.");
+        emberAfSendImmediateDefaultResponse(status);
+    }
+    if (sendStatus != EMBER_SUCCESS)
+    {
+        emberAfPrintln(EMBER_AF_PRINT_DEBUG, "OpCreds: Failed to send OpCSRRequest: 0x%x", sendStatus);
+    }
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(Zcl, "Failed to encode response command: %s", ErrorStr(err));
+    }
+
+    return true;
+}
+
+bool emberAfOperationalCredentialsClusterUpdateOpCertCallback(chip::app::Command * commandObj, chip::ByteSpan NOC,
+                                                              chip::ByteSpan ICACertificate)
+{
     EmberAfStatus status = EMBER_ZCL_STATUS_FAILURE;
     emberAfSendImmediateDefaultResponse(status);
     return true;

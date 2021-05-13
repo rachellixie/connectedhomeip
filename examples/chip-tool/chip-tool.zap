@@ -1616,7 +1616,7 @@
           "enabled": 1,
           "commands": [
             {
-              "name": "GetFabricId",
+              "name": "SetFabric",
               "code": 0,
               "mfgCode": null,
               "source": "client",
@@ -1634,6 +1634,14 @@
             {
               "name": "RemoveFabric",
               "code": 10,
+              "mfgCode": null,
+              "source": "client",
+              "incoming": 1,
+              "outgoing": 1
+            },
+            {
+              "name": "RemoveAllFabrics",
+              "code": 11,
               "mfgCode": null,
               "source": "client",
               "incoming": 1,
@@ -1667,7 +1675,7 @@
           "enabled": 0,
           "commands": [
             {
-              "name": "GetFabricIdResponse",
+              "name": "SetFabricResponse",
               "code": 1,
               "mfgCode": null,
               "source": "server",
@@ -5838,6 +5846,36 @@
             {
               "name": "list_int8u",
               "code": 26,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "list_octet_string",
+              "code": 27,
+              "mfgCode": null,
+              "side": "server",
+              "included": 1,
+              "storageOption": "RAM",
+              "singleton": 0,
+              "bounded": 0,
+              "defaultValue": "",
+              "reportable": 0,
+              "minInterval": 0,
+              "maxInterval": 65344,
+              "reportableChange": 0
+            },
+            {
+              "name": "list_struct_octet_string",
+              "code": 28,
               "mfgCode": null,
               "side": "server",
               "included": 1,

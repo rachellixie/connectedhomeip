@@ -41,6 +41,7 @@
 #include <core/CHIPEncoding.h>
 #include <core/CHIPSafeCasts.h>
 #include <protocols/Protocols.h>
+#include <protocols/service_provisioning/ServiceProvisioning.h>
 #include <support/Base64.h>
 #include <support/CHIPMem.h>
 #include <support/CodeUtils.h>
@@ -55,16 +56,6 @@ using namespace chip::Callback;
 
 namespace chip {
 namespace Controller {
-// TODO: This is a placeholder delegate for exchange context created in Device::SendMessage()
-//       Delete this class when Device::SendMessage() is obsoleted.
-class DeviceExchangeDelegate : public Messaging::ExchangeDelegate
-{
-    void OnMessageReceived(Messaging::ExchangeContext * ec, const PacketHeader & packetHeader, const PayloadHeader & payloadHeader,
-                           System::PacketBufferHandle payload) override
-    {}
-    void OnResponseTimeout(Messaging::ExchangeContext * ec) override {}
-};
-
 CHIP_ERROR Device::SendMessage(Protocols::Id protocolId, uint8_t msgType, System::PacketBufferHandle buffer)
 {
     System::PacketBufferHandle resend;
@@ -88,15 +79,13 @@ CHIP_ERROR Device::SendMessage(Protocols::Id protocolId, uint8_t msgType, System
         resend = buffer.CloneData();
     }
 
-    // TODO(#5675): This code is temporary, and must be updated to use the IM API. Currenlty, we use a temporary Protocol
-    // TempZCL to carry over legacy ZCL messages, use an ephemeral exchange to send message and use its unsolicited message
-    // handler to receive messages. We need to set flag kFromInitiator to allow receiver to deliver message to corresponding
-    // unsolicited message handler, and we also need to set flag kNoAutoRequestAck since there is no persistent exchange to
-    // receive the ack message. This logic need to be deleted after we converting all legacy ZCL messages to IM messages.
+    // TODO(#5675): This code is temporary, and must be updated to use the IM API. Currently, we use a temporary Protocol
+    // TempZCL to carry over legacy ZCL messages.  We need to set flag kFromInitiator to allow receiver to deliver message to
+    // corresponding unsolicited message handler.
+    //
+    // TODO: Also, disable CRMP for now because it just doesn't seem to work
     sendFlags.Set(Messaging::SendMessageFlags::kFromInitiator).Set(Messaging::SendMessageFlags::kNoAutoRequestAck);
-
-    DeviceExchangeDelegate delegate;
-    exchange->SetDelegate(&delegate);
+    exchange->SetDelegate(this);
 
     CHIP_ERROR err = exchange->SendMessage(protocolId, msgType, std::move(buffer), sendFlags);
 
@@ -112,16 +101,15 @@ CHIP_ERROR Device::SendMessage(Protocols::Id protocolId, uint8_t msgType, System
         ReturnErrorOnFailure(LoadSecureSessionParameters(ResetTransport::kYes));
 
         err = exchange->SendMessage(protocolId, msgType, std::move(resend), sendFlags);
-        ChipLogDetail(Controller, "Re-SendMessage returned %d", err);
-        ReturnErrorOnFailure(err);
+        ChipLogDetail(Controller, "Re-SendMessage returned %s", ErrorStr(err));
     }
 
-    if (exchange != nullptr)
+    if (err != CHIP_NO_ERROR)
     {
         exchange->Close();
     }
 
-    return CHIP_NO_ERROR;
+    return err;
 }
 
 CHIP_ERROR Device::LoadSecureSessionParametersIfNeeded(bool & didLoad)
@@ -276,7 +264,8 @@ void Device::OnConnectionExpired(SecureSessionHandle session)
     mSecureSession = SecureSessionHandle{};
 }
 
-void Device::OnMessageReceived(const PacketHeader & header, const PayloadHeader & payloadHeader, System::PacketBufferHandle msgBuf)
+void Device::OnMessageReceived(Messaging::ExchangeContext * exchange, const PacketHeader & header,
+                               const PayloadHeader & payloadHeader, System::PacketBufferHandle msgBuf)
 {
     if (mState == ConnectionState::SecureConnected)
     {
@@ -286,9 +275,15 @@ void Device::OnMessageReceived(const PacketHeader & header, const PayloadHeader 
         }
         else
         {
-            HandleDataModelMessage(mDeviceId, std::move(msgBuf));
+            HandleDataModelMessage(exchange, std::move(msgBuf));
         }
     }
+    exchange->Close();
+}
+
+void Device::OnResponseTimeout(Messaging::ExchangeContext * ec)
+{
+    ec->Close();
 }
 
 CHIP_ERROR Device::OpenPairingWindow(uint32_t timeout, PairingWindowOption option, SetupPayload & setupPayload)
@@ -319,7 +314,7 @@ CHIP_ERROR Device::OpenPairingWindow(uint32_t timeout, PairingWindowOption optio
     System::PacketBufferHandle outBuffer;
     ReturnErrorOnFailure(writer.Finalize(&outBuffer));
 
-    ReturnErrorOnFailure(SendMessage(Protocols::ServiceProvisioning::Id, 0, std::move(outBuffer)));
+    ReturnErrorOnFailure(SendMessage(Protocols::ServiceProvisioning::MsgType::ServiceProvisioningRequest, std::move(outBuffer)));
 
     setupPayload.version               = 0;
     setupPayload.rendezvousInformation = RendezvousInformationFlags(RendezvousInformationFlag::kBLE);
@@ -372,7 +367,7 @@ CHIP_ERROR Device::LoadSecureSessionParameters(ResetTransport resetNeeded)
     }
 
     err = mSessionManager->NewPairing(Optional<Transport::PeerAddress>::Value(mDeviceAddress), mDeviceId, &pairingSession,
-                                      SecureSessionMgr::PairingDirection::kInitiator, mAdminId);
+                                      SecureSession::SessionRole::kInitiator, mAdminId);
     SuccessOrExit(err);
 
 exit:
@@ -404,6 +399,27 @@ void Device::CancelResponseHandler(uint8_t seqNum)
     mCallbacksMgr.CancelResponseCallback(mDeviceId, seqNum);
 }
 
+void Device::AddIMResponseHandler(Callback::Cancelable * onSuccessCallback, Callback::Cancelable * onFailureCallback)
+{
+    // We are using the pointer to command sender object as the identifier of command transactions. This makes sense as long as
+    // there are only one active command transaction on one command sender object. This is a bit tricky, we try to assume that
+    // chip::NodeId is uint64_t so the pointer can be used as a NodeId for CallbackMgr.
+    static_assert(std::is_same<chip::NodeId, uint64_t>::value, "chip::NodeId is not uint64_t");
+    chip::NodeId transactionId = reinterpret_cast<chip::NodeId>(static_cast<app::Command *>(mCommandSender));
+    mCallbacksMgr.AddResponseCallback(transactionId, 0 /* seqNum, always 0 for IM before #6559 */, onSuccessCallback,
+                                      onFailureCallback);
+}
+
+void Device::CancelIMResponseHandler()
+{
+    // We are using the pointer to command sender object as the identifier of command transactions. This makes sense as long as
+    // there are only one active command transaction on one command sender object. This is a bit tricky, we try to assume that
+    // chip::NodeId is uint64_t so the pointer can be used as a NodeId for CallbackMgr.
+    static_assert(std::is_same<chip::NodeId, uint64_t>::value, "chip::NodeId is not uint64_t");
+    chip::NodeId transactionId = reinterpret_cast<chip::NodeId>(static_cast<app::Command *>(mCommandSender));
+    mCallbacksMgr.CancelResponseCallback(transactionId, 0 /* seqNum, always 0 for IM before #6559 */);
+}
+
 void Device::AddReportHandler(EndpointId endpoint, ClusterId cluster, AttributeId attribute,
                               Callback::Cancelable * onReportCallback)
 {
@@ -417,10 +433,8 @@ void Device::InitCommandSender()
         mCommandSender->Shutdown();
         mCommandSender = nullptr;
     }
-#if CHIP_ENABLE_INTERACTION_MODEL
     CHIP_ERROR err = chip::app::InteractionModelEngine::GetInstance()->NewCommandSender(&mCommandSender);
     ChipLogFunctError(err);
-#endif
 }
 
 } // namespace Controller
