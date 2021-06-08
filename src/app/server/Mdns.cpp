@@ -50,9 +50,8 @@ NodeId GetCurrentNodeId()
     auto pairing = GetGlobalAdminPairingTable().cbegin();
     if (pairing != GetGlobalAdminPairingTable().cend())
     {
-        ChipLogProgress(Discovery, "Found admin paring for admin %" PRIX16 ", node 0x%08" PRIx32 "%08" PRIx32,
-                        pairing->GetAdminId(), static_cast<uint32_t>(pairing->GetNodeId() >> 32),
-                        static_cast<uint32_t>(pairing->GetNodeId()));
+        ChipLogProgress(Discovery, "Found admin pairing for admin %" PRIX16 ", node 0x" ChipLogFormatX64, pairing->GetAdminId(),
+                        ChipLogValueX64(pairing->GetNodeId()));
         return pairing->GetNodeId();
     }
 
@@ -102,16 +101,14 @@ CHIP_ERROR AdvertiseOperational()
             .SetPeerId(PeerId().SetFabricId(fabricId).SetNodeId(GetCurrentNodeId()))
             .SetMac(FillMAC(mac))
             .SetPort(CHIP_PORT)
-            .SetCRMPRetryIntervals(CHIP_CONFIG_RMP_DEFAULT_INITIAL_RETRY_INTERVAL, CHIP_CONFIG_RMP_DEFAULT_ACTIVE_RETRY_INTERVAL)
+            .SetMRPRetryIntervals(CHIP_CONFIG_MRP_DEFAULT_ACTIVE_RETRY_INTERVAL, CHIP_CONFIG_MRP_DEFAULT_ACTIVE_RETRY_INTERVAL)
             .EnableIpV4(true);
 
     auto & mdnsAdvertiser = chip::Mdns::ServiceAdvertiser::Instance();
 
-    ChipLogProgress(Discovery, "Advertise operational node %08" PRIx32 "%08" PRIx32 "-%08" PRIx32 "%08" PRIx32,
-                    static_cast<uint32_t>(advertiseParameters.GetPeerId().GetFabricId() >> 32),
-                    static_cast<uint32_t>(advertiseParameters.GetPeerId().GetFabricId()),
-                    static_cast<uint32_t>(advertiseParameters.GetPeerId().GetNodeId() >> 32),
-                    static_cast<uint32_t>(advertiseParameters.GetPeerId().GetNodeId()));
+    ChipLogProgress(Discovery, "Advertise operational node " ChipLogFormatX64 "-" ChipLogFormatX64,
+                    ChipLogValueX64(advertiseParameters.GetPeerId().GetFabricId()),
+                    ChipLogValueX64(advertiseParameters.GetPeerId().GetNodeId()));
     return mdnsAdvertiser.Advertise(advertiseParameters);
 }
 

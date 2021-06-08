@@ -17,7 +17,6 @@
  */
 
 #include "PairingCommand.h"
-#include "gen/enums.h"
 #include <lib/core/CHIPSafeCasts.h>
 
 using namespace ::chip;
@@ -31,12 +30,14 @@ CHIP_ERROR PairingCommand::Run(PersistentStorage & storage, NodeId localId, Node
 {
     CHIP_ERROR err = CHIP_NO_ERROR;
 
-    mOpCredsIssuer.Initialize();
-
     chip::Controller::CommissionerInitParams params;
-    params.storageDelegate                = &storage;
-    params.mDeviceAddressUpdateDelegate   = this;
-    params.pairingDelegate                = this;
+    params.storageDelegate              = &storage;
+    params.mDeviceAddressUpdateDelegate = this;
+    params.pairingDelegate              = this;
+
+    err = mOpCredsIssuer.Initialize(storage);
+    VerifyOrExit(err == CHIP_NO_ERROR, ChipLogError(Controller, "Init failure! Operational Cred Issuer: %s", ErrorStr(err)));
+
     params.operationalCredentialsDelegate = &mOpCredsIssuer;
 
     err = mCommissioner.SetUdpListenPort(storage.GetListenPort());
@@ -208,19 +209,16 @@ CHIP_ERROR PairingCommand::AddThreadNetwork()
 {
     Callback::Cancelable * successCallback = mOnAddThreadNetworkCallback->Cancel();
     Callback::Cancelable * failureCallback = mOnFailureCallback->Cancel();
-    ByteSpan operationalDataset            = ByteSpan(Uint8::from_char(mOperationalDataset), strlen(mOperationalDataset));
 
-    return mCluster.AddThreadNetwork(successCallback, failureCallback, operationalDataset, kBreadcrumb, kTimeoutMs);
+    return mCluster.AddThreadNetwork(successCallback, failureCallback, mOperationalDataset, kBreadcrumb, kTimeoutMs);
 }
 
 CHIP_ERROR PairingCommand::AddWiFiNetwork()
 {
     Callback::Cancelable * successCallback = mOnAddWiFiNetworkCallback->Cancel();
     Callback::Cancelable * failureCallback = mOnFailureCallback->Cancel();
-    ByteSpan ssid                          = ByteSpan(Uint8::from_char(mSSID), strlen(mSSID));
-    ByteSpan credentials                   = ByteSpan(Uint8::from_char(mPassword), strlen(mPassword));
 
-    return mCluster.AddWiFiNetwork(successCallback, failureCallback, ssid, credentials, kBreadcrumb, kTimeoutMs);
+    return mCluster.AddWiFiNetwork(successCallback, failureCallback, mSSID, mPassword, kBreadcrumb, kTimeoutMs);
 }
 
 CHIP_ERROR PairingCommand::EnableNetwork()
@@ -231,7 +229,7 @@ CHIP_ERROR PairingCommand::EnableNetwork()
     ByteSpan networkId;
     if (mNetworkType == PairingNetworkType::WiFi)
     {
-        networkId = ByteSpan(Uint8::from_char(mSSID), strlen(mSSID));
+        networkId = mSSID;
     }
     else
     {

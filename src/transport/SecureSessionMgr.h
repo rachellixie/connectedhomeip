@@ -61,6 +61,11 @@ public:
 
     void operator=(EncryptedPacketBufferHandle && aBuffer) { PacketBufferHandle::operator=(std::move(aBuffer)); }
 
+    using System::PacketBufferHandle::IsNull;
+    // Pass-through to HasChainedBuffer on our underlying buffer without
+    // exposing operator->
+    bool HasChainedBuffer() const { return (*this)->HasChainedBuffer(); }
+
     uint32_t GetMsgId() const;
 
     /**
@@ -92,13 +97,23 @@ public:
     CHIP_ERROR InsertPacketHeader(const PacketHeader & aPacketHeader) { return aPacketHeader.EncodeBeforeData(*this); }
 #endif // CHIP_ENABLE_TEST_ENCRYPTED_BUFFER_API
 
+    static EncryptedPacketBufferHandle MarkEncrypted(PacketBufferHandle && aBuffer)
+    {
+        return EncryptedPacketBufferHandle(std::move(aBuffer));
+    }
+
+    /**
+     * Get a handle to the data that allows mutating the bytes.  This should
+     * only be used if absolutely necessary, because EncryptedPacketBufferHandle
+     * represents a buffer that we want to resend as-is.
+     *
+     * We only allow doing this with an rvalue reference, so the fact that we
+     * are moving out of the EncryptedPacketBufferHandle is clear.
+     */
+    PacketBufferHandle CastToWritable() && { return PacketBufferHandle(std::move(*this)); }
+
 private:
-    // Allow SecureSessionMgr to assign or construct us from a PacketBufferHandle
-    friend class SecureSessionMgr;
-
     EncryptedPacketBufferHandle(PacketBufferHandle && aBuffer) : PacketBufferHandle(std::move(aBuffer)) {}
-
-    void operator=(PacketBufferHandle && aBuffer) { PacketBufferHandle::operator=(std::move(aBuffer)); }
 };
 
 /**
@@ -125,7 +140,7 @@ public:
      */
     virtual void OnMessageReceived(const PacketHeader & packetHeader, const PayloadHeader & payloadHeader,
                                    SecureSessionHandle session, const Transport::PeerAddress & source,
-                                   System::PacketBufferHandle msgBuf, SecureSessionMgr * mgr)
+                                   System::PacketBufferHandle && msgBuf, SecureSessionMgr * mgr)
     {}
 
     /**
@@ -176,7 +191,7 @@ public:
      */
     CHIP_ERROR SendMessage(SecureSessionHandle session, PayloadHeader & payloadHeader, System::PacketBufferHandle && msgBuf,
                            EncryptedPacketBufferHandle * bufferRetainSlot = nullptr);
-    CHIP_ERROR SendEncryptedMessage(SecureSessionHandle session, EncryptedPacketBufferHandle msgBuf,
+    CHIP_ERROR SendEncryptedMessage(SecureSessionHandle session, EncryptedPacketBufferHandle && msgBuf,
                                     EncryptedPacketBufferHandle * bufferRetainSlot);
 
     Transport::PeerConnectionState * GetPeerConnectionState(SecureSessionHandle session);
@@ -255,7 +270,7 @@ public:
      * @param source    the source address of the package
      * @param msgBuf    the buffer containing a full CHIP message (except for the optional length field).
      */
-    void OnMessageReceived(const Transport::PeerAddress & source, System::PacketBufferHandle msgBuf) override;
+    void OnMessageReceived(const Transport::PeerAddress & source, System::PacketBufferHandle && msgBuf) override;
 
 private:
     /**
@@ -287,7 +302,7 @@ private:
     GlobalEncryptedMessageCounter mGlobalEncryptedMessageCounter;
 
     CHIP_ERROR SendMessage(SecureSessionHandle session, PayloadHeader & payloadHeader, PacketHeader & packetHeader,
-                           System::PacketBufferHandle msgBuf, EncryptedPacketBufferHandle * bufferRetainSlot,
+                           System::PacketBufferHandle && msgBuf, EncryptedPacketBufferHandle * bufferRetainSlot,
                            EncryptionState encryptionState);
 
     /** Schedules a new oneshot timer for checking connection expiry. */
@@ -307,9 +322,9 @@ private:
     static void ExpiryTimerCallback(System::Layer * layer, void * param, System::Error error);
 
     void SecureMessageDispatch(const PacketHeader & packetHeader, const Transport::PeerAddress & peerAddress,
-                               System::PacketBufferHandle msg);
+                               System::PacketBufferHandle && msg);
     void MessageDispatch(const PacketHeader & packetHeader, const Transport::PeerAddress & peerAddress,
-                         System::PacketBufferHandle msg);
+                         System::PacketBufferHandle && msg);
 
     static bool IsControlMessage(PayloadHeader & payloadHeader)
     {

@@ -34,14 +34,15 @@
 #include <core/CHIPCircularTLVBuffer.h>
 #include <messaging/ExchangeMgr.h>
 #include <support/PersistedCounter.h>
+#include <system/SystemMutex.h>
 
 #define CHIP_CONFIG_EVENT_GLOBAL_PRIORITY PriorityLevel::Debug
 
 namespace chip {
 namespace app {
-constexpr size_t kMaxEventSizeReserve = 512;
-constexpr uint16_t kRequiredEventField =
-    (1 << EventDataElement::kCsTag_PriorityLevel) | (1 << EventDataElement::kCsTag_DeltaSystemTimestamp);
+constexpr size_t kMaxEventSizeReserve  = 512;
+constexpr uint16_t kRequiredEventField = (1 << EventDataElement::kCsTag_PriorityLevel) |
+    (1 << EventDataElement::kCsTag_DeltaSystemTimestamp) | (1 << EventDataElement::kCsTag_EventPath);
 
 /**
  * @brief
@@ -241,8 +242,6 @@ class EventManagement
 public:
     /**
      * @brief
-     *   EventManagement constructor
-     *
      * Initialize the EventManagement with an array of LogStorageResources.  The
      * array must provide a resource for each valid priority level, the elements
      * of the array must be in increasing numerical value of priority (and in
@@ -259,16 +258,8 @@ public:
      * @param[in] apLogStorageResources  An array of LogStorageResources for each priority level.
      *
      */
-    EventManagement(Messaging::ExchangeManager * apExchangeManager, int aNumBuffers, CircularEventBuffer * apCircularEventBuffer,
-                    const LogStorageResources * const apLogStorageResources);
-
-    void Init(Messaging::ExchangeManager * apExchangeManager, int aNumBuffers, CircularEventBuffer * apCircularEventBuffer,
+    void Init(Messaging::ExchangeManager * apExchangeManager, uint32_t aNumBuffers, CircularEventBuffer * apCircularEventBuffer,
               const LogStorageResources * const apLogStorageResources);
-    /**
-     * @brief
-     *   EventManagement default constructor. Provided primarily to make the compiler happy.
-     */
-    EventManagement(){};
 
     static EventManagement & GetInstance();
 
@@ -292,12 +283,21 @@ public:
      *
      * @note This function must be called prior to the logging being used.
      */
-    static void CreateEventManagement(Messaging::ExchangeManager * apExchangeManager, int aNumBuffers,
+    static void CreateEventManagement(Messaging::ExchangeManager * apExchangeManager, uint32_t aNumBuffers,
                                       CircularEventBuffer * apCircularEventBuffer,
                                       const LogStorageResources * const apLogStorageResources);
 
     static void DestroyEventManagement();
 
+    class ScopedLock
+    {
+    public:
+        ScopedLock(EventManagement & aEventManagement) : mEventManagement(aEventManagement) { mEventManagement.mAccessLock.Lock(); }
+        ~ScopedLock() { mEventManagement.mAccessLock.Unlock(); }
+
+    private:
+        EventManagement & mEventManagement;
+    };
     /**
      * @brief
      *   Log an event via a EventLoggingDelegate, with options.
@@ -566,6 +566,7 @@ private:
     Messaging::ExchangeManager * mpExchangeMgr = nullptr;
     EventManagementStates mState               = EventManagementStates::Shutdown;
     uint32_t mBytesWritten                     = 0;
+    System::Mutex mAccessLock;
 };
 } // namespace app
 } // namespace chip

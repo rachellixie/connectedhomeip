@@ -24,6 +24,7 @@
 #include "gen/CHIPClusters.h"
 
 #include <controller/ExampleOperationalCredentialsIssuer.h>
+#include <support/Span.h>
 
 enum class PairingMode
 {
@@ -93,7 +94,6 @@ public:
             AddArgument("device-remote-port", 0, UINT16_MAX, &mRemotePort);
             break;
         }
-        mOpCredsIssuer.Initialize();
     }
 
     /////////// Command Interface /////////
@@ -135,9 +135,9 @@ private:
     uint64_t mFabricId;
     uint16_t mDiscriminator;
     uint32_t mSetupPINCode;
-    char * mOperationalDataset;
-    char * mSSID;
-    char * mPassword;
+    chip::ByteSpan mOperationalDataset;
+    chip::ByteSpan mSSID;
+    chip::ByteSpan mPassword;
 
     chip::Callback::Callback<NetworkCommissioningClusterAddThreadNetworkResponseCallback> * mOnAddThreadNetworkCallback;
     chip::Callback::Callback<NetworkCommissioningClusterAddWiFiNetworkResponseCallback> * mOnAddWiFiNetworkCallback;

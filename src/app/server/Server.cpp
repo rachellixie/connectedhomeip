@@ -33,6 +33,7 @@
 #include <messaging/ExchangeMgr.h>
 #include <platform/CHIPDeviceLayer.h>
 #include <platform/KeyValueStoreManager.h>
+#include <protocols/secure_channel/CASEServer.h>
 #include <protocols/secure_channel/MessageCounterManager.h>
 #include <setup_payload/SetupPayload.h>
 #include <support/CodeUtils.h>
@@ -128,8 +129,8 @@ CHIP_ERROR RestoreAllAdminPairingsFromKVS(AdminPairingTable & adminPairings, Adm
             AdminPairingInfo * admin = adminPairings.FindAdminWithId(id);
             if (admin != nullptr)
             {
-                ChipLogProgress(AppServer, "Found admin pairing for %d, node ID 0x%08" PRIx32 "%08" PRIx32, admin->GetAdminId(),
-                                static_cast<uint32_t>(admin->GetNodeId() >> 32), static_cast<uint32_t>(admin->GetNodeId()));
+                ChipLogProgress(AppServer, "Found admin pairing for %d, node ID 0x" ChipLogFormatX64, admin->GetAdminId(),
+                                ChipLogValueX64(admin->GetNodeId()));
             }
         }
     }
@@ -167,9 +168,8 @@ static CHIP_ERROR RestoreAllSessionsFromKVS(SecureSessionMgr & sessionMgr, Rende
         {
             connection.GetPASESession(session);
 
-            ChipLogProgress(AppServer, "Fetched the session information: from 0x%08" PRIx32 "%08" PRIx32,
-                            static_cast<uint32_t>(session->PeerConnection().GetPeerNodeId() >> 32),
-                            static_cast<uint32_t>(session->PeerConnection().GetPeerNodeId()));
+            ChipLogProgress(AppServer, "Fetched the session information: from 0x" ChipLogFormatX64,
+                            ChipLogValueX64(session->PeerConnection().GetPeerNodeId()));
             sessionMgr.NewPairing(Optional<Transport::PeerAddress>::Value(session->PeerConnection().GetPeerAddress()),
                                   session->PeerConnection().GetPeerNodeId(), session, SecureSession::SessionRole::kResponder,
                                   connection.GetAdminId(), nullptr);
@@ -285,6 +285,7 @@ private:
 DemoTransportMgr gTransports;
 SecureSessionMgr gSessions;
 RendezvousServer gRendezvousServer;
+CASEServer gCASEServer;
 Messaging::ExchangeManager gExchangeMgr;
 ServerRendezvousAdvertisementDelegate gAdvDelegate;
 
@@ -315,7 +316,7 @@ class ServerCallback : public ExchangeDelegate
 {
 public:
     void OnMessageReceived(Messaging::ExchangeContext * exchangeContext, const PacketHeader & packetHeader,
-                           const PayloadHeader & payloadHeader, System::PacketBufferHandle buffer) override
+                           const PayloadHeader & payloadHeader, System::PacketBufferHandle && buffer) override
     {
         // as soon as a client connects, assume it is connected
         VerifyOrExit(!buffer.IsNull(), ChipLogError(AppServer, "Received data but couldn't process it..."));
@@ -443,33 +444,6 @@ CHIP_ERROR OpenDefaultPairingWindow(ResetAdmins resetAdmins, chip::PairingWindow
     return gRendezvousServer.WaitForPairing(std::move(params), &gExchangeMgr, &gTransports, &gSessions, adminInfo);
 }
 
-#if CHIP_DEVICE_CONFIG_ENABLE_MDNS && !CHIP_DEVICE_LAYER_TARGET_ESP32
-static void ChipEventHandler(const DeviceLayer::ChipDeviceEvent * event, intptr_t)
-{
-    const auto advertise = [] {
-        CHIP_ERROR err = app::Mdns::AdvertiseOperational();
-        if (err != CHIP_NO_ERROR)
-            ChipLogError(AppServer, "Failed to start operational advertising: %s", chip::ErrorStr(err));
-    };
-
-    switch (event->Type)
-    {
-    case DeviceLayer::DeviceEventType::kInternetConnectivityChange:
-        VerifyOrReturn(event->InternetConnectivityChange.IPv4 == DeviceLayer::kConnectivity_Established);
-        advertise();
-        break;
-#if CHIP_DEVICE_CONFIG_ENABLE_THREAD
-    case DeviceLayer::DeviceEventType::kThreadStateChange:
-        VerifyOrReturn(event->ThreadStateChange.AddressChanged);
-        advertise();
-        break;
-#endif
-    default:
-        break;
-    }
-}
-#endif
-
 // The function will initialize datamodel handler and then start the server
 // The server assumes the platform's networking has been setup already
 void InitServer(AppDelegate * delegate)
@@ -484,6 +458,8 @@ void InitServer(AppDelegate * delegate)
 #if CHIP_DEVICE_LAYER_TARGET_DARWIN
     err = PersistedStorage::KeyValueStoreMgrImpl().Init("chip.store");
     SuccessOrExit(err);
+#elif CHIP_DEVICE_LAYER_TARGET_LINUX
+    PersistedStorage::KeyValueStoreMgrImpl().Init("/tmp/chip_server_kvs");
 #endif
 
     err = gRendezvousServer.Init(delegate, &gServerStorage);
@@ -554,7 +530,6 @@ void InitServer(AppDelegate * delegate)
 // ESP32 examples have a custom logic for enabling DNS-SD
 #if CHIP_DEVICE_CONFIG_ENABLE_MDNS && !CHIP_DEVICE_LAYER_TARGET_ESP32
     app::Mdns::StartServer();
-    PlatformMgr().AddEventHandler(ChipEventHandler, {});
 #endif
 
     gCallbacks.SetSessionMgr(&gSessions);
@@ -566,6 +541,9 @@ void InitServer(AppDelegate * delegate)
     // Register to receive unsolicited Service Provisioning messages from the exchange manager.
     err = gExchangeMgr.RegisterUnsolicitedMessageHandlerForProtocol(Protocols::ServiceProvisioning::Id, &gCallbacks);
     VerifyOrExit(err == CHIP_NO_ERROR, err = CHIP_ERROR_NO_UNSOLICITED_MESSAGE_HANDLER);
+
+    err = gCASEServer.ListenForSessionEstablishment(&gExchangeMgr, &gTransports, &gSessions, &GetGlobalAdminPairingTable());
+    SuccessOrExit(err);
 
 exit:
     if (err != CHIP_NO_ERROR)

@@ -76,6 +76,8 @@ class ChipClusters:
                 "MfgSpecificPing": {
                 },
             },
+            "BinaryInputBasic": {
+            },
             "Binding": {
                 "Bind": {
                     "nodeId": "int",
@@ -89,6 +91,8 @@ class ChipClusters:
                     "endpointId": "int",
                     "clusterId": "int",
                 },
+            },
+            "BridgedDeviceBasic": {
             },
             "ColorControl": {
                 "MoveColor": {
@@ -290,6 +294,12 @@ class ChipClusters:
                     "pin": "str",
                 },
             },
+            "EthernetNetworkDiagnostics": {
+                "ResetCounts": {
+                },
+            },
+            "FixedLabel": {
+            },
             "GeneralCommissioning": {
                 "ArmFailSafe": {
                     "expiryLengthSeconds": "int",
@@ -304,6 +314,8 @@ class ChipClusters:
                     "breadcrumb": "int",
                     "timeoutMs": "int",
                 },
+            },
+            "GeneralDiagnostics": {
             },
             "GroupKeyManagement": {
             },
@@ -507,6 +519,8 @@ class ChipClusters:
             },
             "PumpConfigurationAndControl": {
             },
+            "RelativeHumidityMeasurement": {
+            },
             "Scenes": {
                 "AddScene": {
                     "groupId": "int",
@@ -541,6 +555,10 @@ class ChipClusters:
                     "sceneId": "int",
                 },
             },
+            "SoftwareDiagnostics": {
+                "ResetWatermarks": {
+                },
+            },
             "Switch": {
             },
             "TvChannel": {
@@ -569,6 +587,8 @@ class ChipClusters:
                 "TestNotHandled": {
                 },
                 "TestSpecific": {
+                },
+                "TestUnknownCommand": {
                 },
             },
             "Thermostat": {
@@ -673,7 +693,30 @@ class ChipClusters:
                 "LocalConfigDisabled",
                 "ClusterRevision",
             ],
+            "BinaryInputBasic": [
+                "OutOfService",
+                "PresentValue",
+                "StatusFlags",
+                "ClusterRevision",
+            ],
             "Binding": [
+                "ClusterRevision",
+            ],
+            "BridgedDeviceBasic": [
+                "VendorName",
+                "VendorID",
+                "ProductName",
+                "UserLabel",
+                "HardwareVersion",
+                "HardwareVersionString",
+                "SoftwareVersion",
+                "SoftwareVersionString",
+                "ManufacturingDate",
+                "PartNumber",
+                "ProductURL",
+                "ProductLabel",
+                "SerialNumber",
+                "Reachable",
                 "ClusterRevision",
             ],
             "ColorControl": [
@@ -735,6 +778,10 @@ class ChipClusters:
                 "ClusterRevision",
             ],
             "Descriptor": [
+                "DeviceList",
+                "ServerList",
+                "ClientList",
+                "PartsList",
                 "ClusterRevision",
             ],
             "DoorLock": [
@@ -743,12 +790,31 @@ class ChipClusters:
                 "ActuatorEnabled",
                 "ClusterRevision",
             ],
+            "EthernetNetworkDiagnostics": [
+                "PacketRxCount",
+                "PacketTxCount",
+                "TxErrCount",
+                "CollisionCount",
+                "OverrunCount",
+                "ClusterRevision",
+            ],
+            "FixedLabel": [
+                "LabelList",
+                "ClusterRevision",
+            ],
             "GeneralCommissioning": [
                 "FabricId",
                 "Breadcrumb",
                 "ClusterRevision",
             ],
+            "GeneralDiagnostics": [
+                "NetworkInterfaces",
+                "RebootCount",
+                "ClusterRevision",
+            ],
             "GroupKeyManagement": [
+                "Groups",
+                "GroupKeys",
                 "ClusterRevision",
             ],
             "Groups": [
@@ -784,6 +850,7 @@ class ChipClusters:
                 "ClusterRevision",
             ],
             "OperationalCredentials": [
+                "FabricsList",
                 "ClusterRevision",
             ],
             "PumpConfigurationAndControl": [
@@ -796,12 +863,22 @@ class ChipClusters:
                 "OperationMode",
                 "ClusterRevision",
             ],
+            "RelativeHumidityMeasurement": [
+                "MeasuredValue",
+                "MinMeasuredValue",
+                "MaxMeasuredValue",
+                "ClusterRevision",
+            ],
             "Scenes": [
                 "SceneCount",
                 "CurrentScene",
                 "CurrentGroup",
                 "SceneValid",
                 "NameSupport",
+                "ClusterRevision",
+            ],
+            "SoftwareDiagnostics": [
+                "CurrentHeapHighWatermark",
                 "ClusterRevision",
             ],
             "Switch": [
@@ -842,6 +919,9 @@ class ChipClusters:
                 "Enum8",
                 "Enum16",
                 "OctetString",
+                "ListInt8u",
+                "ListOctetString",
+                "ListStructOctetString",
                 "ClusterRevision",
             ],
             "Thermostat": [
@@ -1106,6 +1186,10 @@ class ChipClusters:
         return self._chipLib.chip_ime_AppendCommand_DoorLock_UnlockWithTimeout(
                 device, ZCLendpoint, ZCLgroupid, timeoutInSeconds, pin, len(pin)
         )
+    def ClusterEthernetNetworkDiagnostics_CommandResetCounts(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_AppendCommand_EthernetNetworkDiagnostics_ResetCounts(
+                device, ZCLendpoint, ZCLgroupid
+        )
     def ClusterGeneralCommissioning_CommandArmFailSafe(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int, expiryLengthSeconds: int, breadcrumb: int, timeoutMs: int):
         return self._chipLib.chip_ime_AppendCommand_GeneralCommissioning_ArmFailSafe(
                 device, ZCLendpoint, ZCLgroupid, expiryLengthSeconds, breadcrumb, timeoutMs
@@ -1356,6 +1440,10 @@ class ChipClusters:
         return self._chipLib.chip_ime_AppendCommand_Scenes_ViewScene(
                 device, ZCLendpoint, ZCLgroupid, groupId, sceneId
         )
+    def ClusterSoftwareDiagnostics_CommandResetWatermarks(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_AppendCommand_SoftwareDiagnostics_ResetWatermarks(
+                device, ZCLendpoint, ZCLgroupid
+        )
     def ClusterTvChannel_CommandChangeChannel(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int, match: bytes):
         match = match.encode("utf-8") + b'\x00'
         return self._chipLib.chip_ime_AppendCommand_TvChannel_ChangeChannel(
@@ -1384,6 +1472,10 @@ class ChipClusters:
         )
     def ClusterTestCluster_CommandTestSpecific(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_AppendCommand_TestCluster_TestSpecific(
+                device, ZCLendpoint, ZCLgroupid
+        )
+    def ClusterTestCluster_CommandTestUnknownCommand(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_AppendCommand_TestCluster_TestUnknownCommand(
                 device, ZCLendpoint, ZCLgroupid
         )
     def ClusterThermostat_CommandClearWeeklySchedule(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
@@ -1517,8 +1609,50 @@ class ChipClusters:
         return self._chipLib.chip_ime_ReadAttribute_Basic_LocalConfigDisabled(device, ZCLendpoint, ZCLgroupid)
     def ClusterBasic_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_Basic_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBinaryInputBasic_ReadAttributeOutOfService(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_OutOfService(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBinaryInputBasic_ReadAttributePresentValue(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_PresentValue(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBinaryInputBasic_ConfigureAttributePresentValue(self, device: ctypes.c_void_p, ZCLendpoint: int, minInterval: int, maxInterval: int, change: int):
+        return self._chipLib.chip_ime_ConfigureAttribute_BinaryInputBasic_PresentValue(device, ZCLendpoint, minInterval, maxInterval, change)
+    def ClusterBinaryInputBasic_ReadAttributeStatusFlags(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_StatusFlags(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBinaryInputBasic_ConfigureAttributeStatusFlags(self, device: ctypes.c_void_p, ZCLendpoint: int, minInterval: int, maxInterval: int, change: int):
+        return self._chipLib.chip_ime_ConfigureAttribute_BinaryInputBasic_StatusFlags(device, ZCLendpoint, minInterval, maxInterval, change)
+    def ClusterBinaryInputBasic_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
     def ClusterBinding_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_Binding_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeVendorName(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_VendorName(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeVendorID(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_VendorID(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeProductName(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ProductName(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeUserLabel(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_UserLabel(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeHardwareVersion(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_HardwareVersion(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeHardwareVersionString(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_HardwareVersionString(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeSoftwareVersion(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_SoftwareVersion(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeSoftwareVersionString(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_SoftwareVersionString(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeManufacturingDate(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ManufacturingDate(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributePartNumber(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_PartNumber(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeProductURL(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ProductURL(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeProductLabel(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ProductLabel(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeSerialNumber(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_SerialNumber(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeReachable(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_Reachable(device, ZCLendpoint, ZCLgroupid)
+    def ClusterBridgedDeviceBasic_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
     def ClusterColorControl_ReadAttributeCurrentHue(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_ColorControl_CurrentHue(device, ZCLendpoint, ZCLgroupid)
     def ClusterColorControl_ConfigureAttributeCurrentHue(self, device: ctypes.c_void_p, ZCLendpoint: int, minInterval: int, maxInterval: int, change: int):
@@ -1637,6 +1771,14 @@ class ChipClusters:
         return self._chipLib.chip_ime_ReadAttribute_ContentLaunch_SupportedStreamingTypes(device, ZCLendpoint, ZCLgroupid)
     def ClusterContentLaunch_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_ContentLaunch_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
+    def ClusterDescriptor_ReadAttributeDeviceList(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_Descriptor_DeviceList(device, ZCLendpoint, ZCLgroupid)
+    def ClusterDescriptor_ReadAttributeServerList(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_Descriptor_ServerList(device, ZCLendpoint, ZCLgroupid)
+    def ClusterDescriptor_ReadAttributeClientList(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_Descriptor_ClientList(device, ZCLendpoint, ZCLgroupid)
+    def ClusterDescriptor_ReadAttributePartsList(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_Descriptor_PartsList(device, ZCLendpoint, ZCLgroupid)
     def ClusterDescriptor_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_Descriptor_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
     def ClusterDoorLock_ReadAttributeLockState(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
@@ -1649,12 +1791,38 @@ class ChipClusters:
         return self._chipLib.chip_ime_ReadAttribute_DoorLock_ActuatorEnabled(device, ZCLendpoint, ZCLgroupid)
     def ClusterDoorLock_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_DoorLock_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
+    def ClusterEthernetNetworkDiagnostics_ReadAttributePacketRxCount(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_PacketRxCount(device, ZCLendpoint, ZCLgroupid)
+    def ClusterEthernetNetworkDiagnostics_ReadAttributePacketTxCount(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_PacketTxCount(device, ZCLendpoint, ZCLgroupid)
+    def ClusterEthernetNetworkDiagnostics_ReadAttributeTxErrCount(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_TxErrCount(device, ZCLendpoint, ZCLgroupid)
+    def ClusterEthernetNetworkDiagnostics_ReadAttributeCollisionCount(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_CollisionCount(device, ZCLendpoint, ZCLgroupid)
+    def ClusterEthernetNetworkDiagnostics_ReadAttributeOverrunCount(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_OverrunCount(device, ZCLendpoint, ZCLgroupid)
+    def ClusterEthernetNetworkDiagnostics_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
+    def ClusterFixedLabel_ReadAttributeLabelList(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_FixedLabel_LabelList(device, ZCLendpoint, ZCLgroupid)
+    def ClusterFixedLabel_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_FixedLabel_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
     def ClusterGeneralCommissioning_ReadAttributeFabricId(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_GeneralCommissioning_FabricId(device, ZCLendpoint, ZCLgroupid)
     def ClusterGeneralCommissioning_ReadAttributeBreadcrumb(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_GeneralCommissioning_Breadcrumb(device, ZCLendpoint, ZCLgroupid)
     def ClusterGeneralCommissioning_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_GeneralCommissioning_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
+    def ClusterGeneralDiagnostics_ReadAttributeNetworkInterfaces(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_GeneralDiagnostics_NetworkInterfaces(device, ZCLendpoint, ZCLgroupid)
+    def ClusterGeneralDiagnostics_ReadAttributeRebootCount(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_GeneralDiagnostics_RebootCount(device, ZCLendpoint, ZCLgroupid)
+    def ClusterGeneralDiagnostics_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_GeneralDiagnostics_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
+    def ClusterGroupKeyManagement_ReadAttributeGroups(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_GroupKeyManagement_Groups(device, ZCLendpoint, ZCLgroupid)
+    def ClusterGroupKeyManagement_ReadAttributeGroupKeys(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_GroupKeyManagement_GroupKeys(device, ZCLendpoint, ZCLgroupid)
     def ClusterGroupKeyManagement_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_GroupKeyManagement_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
     def ClusterGroups_ReadAttributeNameSupport(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
@@ -1689,6 +1857,8 @@ class ChipClusters:
         return self._chipLib.chip_ime_ConfigureAttribute_OnOff_OnOff(device, ZCLendpoint, minInterval, maxInterval, change)
     def ClusterOnOff_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_OnOff_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
+    def ClusterOperationalCredentials_ReadAttributeFabricsList(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_OperationalCredentials_FabricsList(device, ZCLendpoint, ZCLgroupid)
     def ClusterOperationalCredentials_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_OperationalCredentials_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
     def ClusterPumpConfigurationAndControl_ReadAttributeMaxPressure(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
@@ -1709,6 +1879,16 @@ class ChipClusters:
         return self._chipLib.chip_ime_ReadAttribute_PumpConfigurationAndControl_OperationMode(device, ZCLendpoint, ZCLgroupid)
     def ClusterPumpConfigurationAndControl_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_PumpConfigurationAndControl_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
+    def ClusterRelativeHumidityMeasurement_ReadAttributeMeasuredValue(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_MeasuredValue(device, ZCLendpoint, ZCLgroupid)
+    def ClusterRelativeHumidityMeasurement_ConfigureAttributeMeasuredValue(self, device: ctypes.c_void_p, ZCLendpoint: int, minInterval: int, maxInterval: int, change: int):
+        return self._chipLib.chip_ime_ConfigureAttribute_RelativeHumidityMeasurement_MeasuredValue(device, ZCLendpoint, minInterval, maxInterval, change)
+    def ClusterRelativeHumidityMeasurement_ReadAttributeMinMeasuredValue(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_MinMeasuredValue(device, ZCLendpoint, ZCLgroupid)
+    def ClusterRelativeHumidityMeasurement_ReadAttributeMaxMeasuredValue(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_MaxMeasuredValue(device, ZCLendpoint, ZCLgroupid)
+    def ClusterRelativeHumidityMeasurement_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
     def ClusterScenes_ReadAttributeSceneCount(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_Scenes_SceneCount(device, ZCLendpoint, ZCLgroupid)
     def ClusterScenes_ReadAttributeCurrentScene(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
@@ -1721,6 +1901,10 @@ class ChipClusters:
         return self._chipLib.chip_ime_ReadAttribute_Scenes_NameSupport(device, ZCLendpoint, ZCLgroupid)
     def ClusterScenes_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_Scenes_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
+    def ClusterSoftwareDiagnostics_ReadAttributeCurrentHeapHighWatermark(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_SoftwareDiagnostics_CurrentHeapHighWatermark(device, ZCLendpoint, ZCLgroupid)
+    def ClusterSoftwareDiagnostics_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_SoftwareDiagnostics_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
     def ClusterSwitch_ReadAttributeNumberOfPositions(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_Switch_NumberOfPositions(device, ZCLendpoint, ZCLgroupid)
     def ClusterSwitch_ReadAttributeCurrentPosition(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
@@ -1783,6 +1967,12 @@ class ChipClusters:
         return self._chipLib.chip_ime_ReadAttribute_TestCluster_Enum16(device, ZCLendpoint, ZCLgroupid)
     def ClusterTestCluster_ReadAttributeOctetString(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_TestCluster_OctetString(device, ZCLendpoint, ZCLgroupid)
+    def ClusterTestCluster_ReadAttributeListInt8u(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_TestCluster_ListInt8u(device, ZCLendpoint, ZCLgroupid)
+    def ClusterTestCluster_ReadAttributeListOctetString(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_TestCluster_ListOctetString(device, ZCLendpoint, ZCLgroupid)
+    def ClusterTestCluster_ReadAttributeListStructOctetString(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
+        return self._chipLib.chip_ime_ReadAttribute_TestCluster_ListStructOctetString(device, ZCLendpoint, ZCLgroupid)
     def ClusterTestCluster_ReadAttributeClusterRevision(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
         return self._chipLib.chip_ime_ReadAttribute_TestCluster_ClusterRevision(device, ZCLendpoint, ZCLgroupid)
     def ClusterThermostat_ReadAttributeLocalTemperature(self, device: ctypes.c_void_p, ZCLendpoint: int, ZCLgroupid: int):
@@ -1981,6 +2171,25 @@ class ChipClusters:
         # Cluster Basic ReadAttribute ClusterRevision
         self._chipLib.chip_ime_ReadAttribute_Basic_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_Basic_ClusterRevision.restype = ctypes.c_uint32
+        # Cluster BinaryInputBasic
+        # Cluster BinaryInputBasic ReadAttribute OutOfService
+        self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_OutOfService.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_OutOfService.restype = ctypes.c_uint32
+        # Cluster BinaryInputBasic ReadAttribute PresentValue
+        self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_PresentValue.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_PresentValue.restype = ctypes.c_uint32
+        # Cluster BinaryInputBasic ConfigureAttribute PresentValue
+        self._chipLib.chip_ime_ConfigureAttribute_BinaryInputBasic_PresentValue.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16, ctypes.c_uint16]
+        self._chipLib.chip_ime_ConfigureAttribute_BinaryInputBasic_PresentValue.restype = ctypes.c_uint32
+        # Cluster BinaryInputBasic ReadAttribute StatusFlags
+        self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_StatusFlags.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_StatusFlags.restype = ctypes.c_uint32
+        # Cluster BinaryInputBasic ConfigureAttribute StatusFlags
+        self._chipLib.chip_ime_ConfigureAttribute_BinaryInputBasic_StatusFlags.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16, ctypes.c_uint16]
+        self._chipLib.chip_ime_ConfigureAttribute_BinaryInputBasic_StatusFlags.restype = ctypes.c_uint32
+        # Cluster BinaryInputBasic ReadAttribute ClusterRevision
+        self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BinaryInputBasic_ClusterRevision.restype = ctypes.c_uint32
         # Cluster Binding
         # Cluster Binding Command Bind
         self._chipLib.chip_ime_AppendCommand_Binding_Bind.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16, ctypes.c_uint64, ctypes.c_uint16, ctypes.c_uint8, ctypes.c_uint16]
@@ -1991,6 +2200,52 @@ class ChipClusters:
         # Cluster Binding ReadAttribute ClusterRevision
         self._chipLib.chip_ime_ReadAttribute_Binding_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_Binding_ClusterRevision.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic
+        # Cluster BridgedDeviceBasic ReadAttribute VendorName
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_VendorName.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_VendorName.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute VendorID
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_VendorID.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_VendorID.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute ProductName
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ProductName.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ProductName.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute UserLabel
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_UserLabel.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_UserLabel.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute HardwareVersion
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_HardwareVersion.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_HardwareVersion.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute HardwareVersionString
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_HardwareVersionString.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_HardwareVersionString.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute SoftwareVersion
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_SoftwareVersion.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_SoftwareVersion.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute SoftwareVersionString
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_SoftwareVersionString.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_SoftwareVersionString.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute ManufacturingDate
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ManufacturingDate.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ManufacturingDate.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute PartNumber
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_PartNumber.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_PartNumber.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute ProductURL
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ProductURL.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ProductURL.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute ProductLabel
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ProductLabel.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ProductLabel.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute SerialNumber
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_SerialNumber.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_SerialNumber.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute Reachable
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_Reachable.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_Reachable.restype = ctypes.c_uint32
+        # Cluster BridgedDeviceBasic ReadAttribute ClusterRevision
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_BridgedDeviceBasic_ClusterRevision.restype = ctypes.c_uint32
         # Cluster ColorControl
         # Cluster ColorControl Command MoveColor
         self._chipLib.chip_ime_AppendCommand_ColorControl_MoveColor.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16, ctypes.c_int16, ctypes.c_int16, ctypes.c_uint8, ctypes.c_uint8]
@@ -2219,6 +2474,18 @@ class ChipClusters:
         self._chipLib.chip_ime_ReadAttribute_ContentLaunch_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_ContentLaunch_ClusterRevision.restype = ctypes.c_uint32
         # Cluster Descriptor
+        # Cluster Descriptor ReadAttribute DeviceList
+        self._chipLib.chip_ime_ReadAttribute_Descriptor_DeviceList.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_Descriptor_DeviceList.restype = ctypes.c_uint32
+        # Cluster Descriptor ReadAttribute ServerList
+        self._chipLib.chip_ime_ReadAttribute_Descriptor_ServerList.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_Descriptor_ServerList.restype = ctypes.c_uint32
+        # Cluster Descriptor ReadAttribute ClientList
+        self._chipLib.chip_ime_ReadAttribute_Descriptor_ClientList.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_Descriptor_ClientList.restype = ctypes.c_uint32
+        # Cluster Descriptor ReadAttribute PartsList
+        self._chipLib.chip_ime_ReadAttribute_Descriptor_PartsList.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_Descriptor_PartsList.restype = ctypes.c_uint32
         # Cluster Descriptor ReadAttribute ClusterRevision
         self._chipLib.chip_ime_ReadAttribute_Descriptor_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_Descriptor_ClusterRevision.restype = ctypes.c_uint32
@@ -2307,6 +2574,35 @@ class ChipClusters:
         # Cluster DoorLock ReadAttribute ClusterRevision
         self._chipLib.chip_ime_ReadAttribute_DoorLock_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_DoorLock_ClusterRevision.restype = ctypes.c_uint32
+        # Cluster EthernetNetworkDiagnostics
+        # Cluster EthernetNetworkDiagnostics Command ResetCounts
+        self._chipLib.chip_ime_AppendCommand_EthernetNetworkDiagnostics_ResetCounts.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_AppendCommand_EthernetNetworkDiagnostics_ResetCounts.restype = ctypes.c_uint32
+        # Cluster EthernetNetworkDiagnostics ReadAttribute PacketRxCount
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_PacketRxCount.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_PacketRxCount.restype = ctypes.c_uint32
+        # Cluster EthernetNetworkDiagnostics ReadAttribute PacketTxCount
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_PacketTxCount.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_PacketTxCount.restype = ctypes.c_uint32
+        # Cluster EthernetNetworkDiagnostics ReadAttribute TxErrCount
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_TxErrCount.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_TxErrCount.restype = ctypes.c_uint32
+        # Cluster EthernetNetworkDiagnostics ReadAttribute CollisionCount
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_CollisionCount.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_CollisionCount.restype = ctypes.c_uint32
+        # Cluster EthernetNetworkDiagnostics ReadAttribute OverrunCount
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_OverrunCount.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_OverrunCount.restype = ctypes.c_uint32
+        # Cluster EthernetNetworkDiagnostics ReadAttribute ClusterRevision
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_EthernetNetworkDiagnostics_ClusterRevision.restype = ctypes.c_uint32
+        # Cluster FixedLabel
+        # Cluster FixedLabel ReadAttribute LabelList
+        self._chipLib.chip_ime_ReadAttribute_FixedLabel_LabelList.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_FixedLabel_LabelList.restype = ctypes.c_uint32
+        # Cluster FixedLabel ReadAttribute ClusterRevision
+        self._chipLib.chip_ime_ReadAttribute_FixedLabel_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_FixedLabel_ClusterRevision.restype = ctypes.c_uint32
         # Cluster GeneralCommissioning
         # Cluster GeneralCommissioning Command ArmFailSafe
         self._chipLib.chip_ime_AppendCommand_GeneralCommissioning_ArmFailSafe.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16, ctypes.c_uint16, ctypes.c_uint64, ctypes.c_uint32]
@@ -2326,7 +2622,23 @@ class ChipClusters:
         # Cluster GeneralCommissioning ReadAttribute ClusterRevision
         self._chipLib.chip_ime_ReadAttribute_GeneralCommissioning_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_GeneralCommissioning_ClusterRevision.restype = ctypes.c_uint32
+        # Cluster GeneralDiagnostics
+        # Cluster GeneralDiagnostics ReadAttribute NetworkInterfaces
+        self._chipLib.chip_ime_ReadAttribute_GeneralDiagnostics_NetworkInterfaces.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_GeneralDiagnostics_NetworkInterfaces.restype = ctypes.c_uint32
+        # Cluster GeneralDiagnostics ReadAttribute RebootCount
+        self._chipLib.chip_ime_ReadAttribute_GeneralDiagnostics_RebootCount.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_GeneralDiagnostics_RebootCount.restype = ctypes.c_uint32
+        # Cluster GeneralDiagnostics ReadAttribute ClusterRevision
+        self._chipLib.chip_ime_ReadAttribute_GeneralDiagnostics_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_GeneralDiagnostics_ClusterRevision.restype = ctypes.c_uint32
         # Cluster GroupKeyManagement
+        # Cluster GroupKeyManagement ReadAttribute Groups
+        self._chipLib.chip_ime_ReadAttribute_GroupKeyManagement_Groups.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_GroupKeyManagement_Groups.restype = ctypes.c_uint32
+        # Cluster GroupKeyManagement ReadAttribute GroupKeys
+        self._chipLib.chip_ime_ReadAttribute_GroupKeyManagement_GroupKeys.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_GroupKeyManagement_GroupKeys.restype = ctypes.c_uint32
         # Cluster GroupKeyManagement ReadAttribute ClusterRevision
         self._chipLib.chip_ime_ReadAttribute_GroupKeyManagement_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_GroupKeyManagement_ClusterRevision.restype = ctypes.c_uint32
@@ -2541,6 +2853,9 @@ class ChipClusters:
         # Cluster OperationalCredentials Command UpdateFabricLabel
         self._chipLib.chip_ime_AppendCommand_OperationalCredentials_UpdateFabricLabel.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16, ctypes.c_char_p, ctypes.c_uint32]
         self._chipLib.chip_ime_AppendCommand_OperationalCredentials_UpdateFabricLabel.restype = ctypes.c_uint32
+        # Cluster OperationalCredentials ReadAttribute FabricsList
+        self._chipLib.chip_ime_ReadAttribute_OperationalCredentials_FabricsList.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_OperationalCredentials_FabricsList.restype = ctypes.c_uint32
         # Cluster OperationalCredentials ReadAttribute ClusterRevision
         self._chipLib.chip_ime_ReadAttribute_OperationalCredentials_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_OperationalCredentials_ClusterRevision.restype = ctypes.c_uint32
@@ -2572,6 +2887,22 @@ class ChipClusters:
         # Cluster PumpConfigurationAndControl ReadAttribute ClusterRevision
         self._chipLib.chip_ime_ReadAttribute_PumpConfigurationAndControl_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_PumpConfigurationAndControl_ClusterRevision.restype = ctypes.c_uint32
+        # Cluster RelativeHumidityMeasurement
+        # Cluster RelativeHumidityMeasurement ReadAttribute MeasuredValue
+        self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_MeasuredValue.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_MeasuredValue.restype = ctypes.c_uint32
+        # Cluster RelativeHumidityMeasurement ConfigureAttribute MeasuredValue
+        self._chipLib.chip_ime_ConfigureAttribute_RelativeHumidityMeasurement_MeasuredValue.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16, ctypes.c_uint16, ctypes.c_uint16]
+        self._chipLib.chip_ime_ConfigureAttribute_RelativeHumidityMeasurement_MeasuredValue.restype = ctypes.c_uint32
+        # Cluster RelativeHumidityMeasurement ReadAttribute MinMeasuredValue
+        self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_MinMeasuredValue.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_MinMeasuredValue.restype = ctypes.c_uint32
+        # Cluster RelativeHumidityMeasurement ReadAttribute MaxMeasuredValue
+        self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_MaxMeasuredValue.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_MaxMeasuredValue.restype = ctypes.c_uint32
+        # Cluster RelativeHumidityMeasurement ReadAttribute ClusterRevision
+        self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_RelativeHumidityMeasurement_ClusterRevision.restype = ctypes.c_uint32
         # Cluster Scenes
         # Cluster Scenes Command AddScene
         self._chipLib.chip_ime_AppendCommand_Scenes_AddScene.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16, ctypes.c_uint16, ctypes.c_uint8, ctypes.c_uint16, ctypes.c_char_p, ctypes.c_uint32, ctypes.c_uint16, ctypes.c_uint8, ctypes.c_uint8]
@@ -2612,6 +2943,16 @@ class ChipClusters:
         # Cluster Scenes ReadAttribute ClusterRevision
         self._chipLib.chip_ime_ReadAttribute_Scenes_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_Scenes_ClusterRevision.restype = ctypes.c_uint32
+        # Cluster SoftwareDiagnostics
+        # Cluster SoftwareDiagnostics Command ResetWatermarks
+        self._chipLib.chip_ime_AppendCommand_SoftwareDiagnostics_ResetWatermarks.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_AppendCommand_SoftwareDiagnostics_ResetWatermarks.restype = ctypes.c_uint32
+        # Cluster SoftwareDiagnostics ReadAttribute CurrentHeapHighWatermark
+        self._chipLib.chip_ime_ReadAttribute_SoftwareDiagnostics_CurrentHeapHighWatermark.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_SoftwareDiagnostics_CurrentHeapHighWatermark.restype = ctypes.c_uint32
+        # Cluster SoftwareDiagnostics ReadAttribute ClusterRevision
+        self._chipLib.chip_ime_ReadAttribute_SoftwareDiagnostics_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_SoftwareDiagnostics_ClusterRevision.restype = ctypes.c_uint32
         # Cluster Switch
         # Cluster Switch ReadAttribute NumberOfPositions
         self._chipLib.chip_ime_ReadAttribute_Switch_NumberOfPositions.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
@@ -2683,6 +3024,9 @@ class ChipClusters:
         # Cluster TestCluster Command TestSpecific
         self._chipLib.chip_ime_AppendCommand_TestCluster_TestSpecific.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_AppendCommand_TestCluster_TestSpecific.restype = ctypes.c_uint32
+        # Cluster TestCluster Command TestUnknownCommand
+        self._chipLib.chip_ime_AppendCommand_TestCluster_TestUnknownCommand.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_AppendCommand_TestCluster_TestUnknownCommand.restype = ctypes.c_uint32
         # Cluster TestCluster ReadAttribute Boolean
         self._chipLib.chip_ime_ReadAttribute_TestCluster_Boolean.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_TestCluster_Boolean.restype = ctypes.c_uint32
@@ -2731,6 +3075,15 @@ class ChipClusters:
         # Cluster TestCluster ReadAttribute OctetString
         self._chipLib.chip_ime_ReadAttribute_TestCluster_OctetString.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_TestCluster_OctetString.restype = ctypes.c_uint32
+        # Cluster TestCluster ReadAttribute ListInt8u
+        self._chipLib.chip_ime_ReadAttribute_TestCluster_ListInt8u.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_TestCluster_ListInt8u.restype = ctypes.c_uint32
+        # Cluster TestCluster ReadAttribute ListOctetString
+        self._chipLib.chip_ime_ReadAttribute_TestCluster_ListOctetString.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_TestCluster_ListOctetString.restype = ctypes.c_uint32
+        # Cluster TestCluster ReadAttribute ListStructOctetString
+        self._chipLib.chip_ime_ReadAttribute_TestCluster_ListStructOctetString.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
+        self._chipLib.chip_ime_ReadAttribute_TestCluster_ListStructOctetString.restype = ctypes.c_uint32
         # Cluster TestCluster ReadAttribute ClusterRevision
         self._chipLib.chip_ime_ReadAttribute_TestCluster_ClusterRevision.argtypes = [ctypes.c_void_p, ctypes.c_uint8, ctypes.c_uint16]
         self._chipLib.chip_ime_ReadAttribute_TestCluster_ClusterRevision.restype = ctypes.c_uint32

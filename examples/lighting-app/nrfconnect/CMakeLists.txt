@@ -34,6 +34,8 @@ find_package(Zephyr HINTS $ENV{ZEPHYR_BASE})
 
 project(chip-nrfconnect-lighting-example)
 
+include(${CHIP_ROOT}/config/nrfconnect/app/enable-gnu-std.cmake)
+
 target_compile_options(app PRIVATE -Werror)
 
 target_include_directories(app PRIVATE
@@ -49,7 +51,6 @@ target_sources(app PRIVATE
                main/main.cpp
                main/ZclCallbacks.cpp
                ${LIGHTING_COMMON}/gen/attribute-size.cpp
-               ${LIGHTING_COMMON}/gen/call-command-handler.cpp
                ${LIGHTING_COMMON}/gen/callback-stub.cpp
                ${LIGHTING_COMMON}/gen/IMClusterCommandHandler.cpp
                ${NRFCONNECT_COMMON}/util/LEDWidget.cpp
@@ -83,9 +84,11 @@ target_sources(app PRIVATE
                ${CHIP_ROOT}/src/app/clusters/bindings/bindings.cpp
                ${CHIP_ROOT}/src/app/clusters/general-commissioning-server/general-commissioning-server.cpp               
                ${CHIP_ROOT}/src/app/clusters/on-off-server/on-off-server.cpp
+               ${CHIP_ROOT}/src/app/clusters/operational-credentials-server/operational-credentials-server.cpp
                ${CHIP_ROOT}/src/app/clusters/level-control/level-control.cpp
                ${CHIP_ROOT}/src/app/clusters/network-commissioning/network-commissioning-ember.cpp
                ${CHIP_ROOT}/src/app/clusters/network-commissioning/network-commissioning.cpp
+               ${CHIP_ROOT}/src/app/clusters/trusted-root-certificates-server/trusted-root-certificates-server.cpp
                )
 
 if (CONFIG_CHIP_PW_RPC)

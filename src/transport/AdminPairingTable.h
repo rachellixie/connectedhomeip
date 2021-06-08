@@ -23,7 +23,9 @@
 
 #include <app/util/basic-types.h>
 #include <core/CHIPPersistentStorageDelegate.h>
+#include <credentials/CHIPOperationalCredentials.h>
 #include <crypto/CHIPCryptoPAL.h>
+#include <lib/core/CHIPSafeCasts.h>
 #include <support/CHIPMem.h>
 #include <support/DLLUtil.h>
 #include <support/Span.h>
@@ -33,7 +35,8 @@ namespace chip {
 namespace Transport {
 
 typedef uint16_t AdminId;
-static constexpr AdminId kUndefinedAdminId = UINT16_MAX;
+static constexpr AdminId kUndefinedAdminId            = UINT16_MAX;
+static constexpr uint8_t kFabricLabelMaxLengthInBytes = 32;
 
 // KVS store is sensitive to length of key strings, based on the underlying
 // platform. Keeping them short.
@@ -41,11 +44,6 @@ constexpr char kAdminTableKeyPrefix[] = "CHIPAdmin";
 constexpr char kAdminTableCountKey[]  = "CHIPAdminNextId";
 
 constexpr uint16_t kMaxChipCertSize = 600;
-
-struct OperationalCredentials
-{
-    uint32_t placeholder;
-};
 
 struct AccessControlList
 {
@@ -70,6 +68,12 @@ class DLL_EXPORT AdminPairingInfo
 public:
     AdminPairingInfo() { Reset(); }
 
+    // Returns a pointer to a null terminated char array
+    const uint8_t * GetFabricLabel() const { return Uint8::from_const_char(mFabricLabel); };
+
+    // Expects a pointer to a null terminated char array
+    CHIP_ERROR SetFabricLabel(const uint8_t * fabricLabel);
+
     ~AdminPairingInfo()
     {
         if (mOperationalKey != nullptr)
@@ -92,17 +96,35 @@ public:
     uint16_t GetVendorId() const { return mVendorId; }
     void SetVendorId(uint16_t vendorId) { mVendorId = vendorId; }
 
-    Crypto::P256Keypair * GetOperationalKey() { return mOperationalKey; }
+    Crypto::P256Keypair * GetOperationalKey()
+    {
+        if (mOperationalKey == nullptr)
+        {
+            mOperationalKey = chip::Platform::New<Crypto::P256Keypair>();
+            mOperationalKey->Initialize();
+        }
+        return mOperationalKey;
+    }
     CHIP_ERROR SetOperationalKey(const Crypto::P256Keypair & key);
+
+    bool AreCredentialsAvailable() const
+    {
+        return (mRootCert != nullptr && mOperationalCert != nullptr && mRootCertLen != 0 && mOpCertLen != 0);
+    }
+
+    CHIP_ERROR GetCredentials(Credentials::OperationalCredentialSet & credentials, Credentials::ChipCertificateSet & certSet,
+                              Credentials::CertificateKeyId & rootKeyId);
+
+    const uint8_t * GetTrustedRoot(uint16_t & size)
+    {
+        size = mRootCertLen;
+        return mRootCert;
+    }
 
     // TODO - Update these APIs to take ownership of the buffer, instead of copying
     //        internally.
     CHIP_ERROR SetOperationalCert(const chip::ByteSpan & cert);
     CHIP_ERROR SetRootCert(const chip::ByteSpan & cert);
-
-    const OperationalCredentials & GetOperationalCreds() const { return mOpCred; }
-    OperationalCredentials & GetOperationalCreds() { return mOpCred; }
-    void SetOperationalCreds(const OperationalCredentials & creds) { mOpCred = creds; }
 
     const AccessControlList & GetACL() const { return mACL; }
     AccessControlList & GetACL() { return mACL; }
@@ -115,10 +137,11 @@ public:
      */
     void Reset()
     {
-        mNodeId   = kUndefinedNodeId;
-        mAdmin    = kUndefinedAdminId;
-        mFabricId = kUndefinedFabricId;
-        mVendorId = kUndefinedVendorId;
+        mNodeId         = kUndefinedNodeId;
+        mAdmin          = kUndefinedAdminId;
+        mFabricId       = kUndefinedFabricId;
+        mVendorId       = kUndefinedVendorId;
+        mFabricLabel[0] = '\0';
 
         if (mOperationalKey != nullptr)
         {
@@ -131,12 +154,12 @@ public:
     friend class AdminPairingTable;
 
 private:
-    AdminId mAdmin     = kUndefinedAdminId;
-    NodeId mNodeId     = kUndefinedNodeId;
-    FabricId mFabricId = kUndefinedFabricId;
-    uint16_t mVendorId = kUndefinedVendorId;
+    NodeId mNodeId                                      = kUndefinedNodeId;
+    FabricId mFabricId                                  = kUndefinedFabricId;
+    AdminId mAdmin                                      = kUndefinedAdminId;
+    uint16_t mVendorId                                  = kUndefinedVendorId;
+    char mFabricLabel[kFabricLabelMaxLengthInBytes + 1] = { '\0' };
 
-    OperationalCredentials mOpCred;
     AccessControlList mACL;
 
     Crypto::P256Keypair * mOperationalKey = nullptr;
@@ -172,6 +195,8 @@ private:
         Crypto::P256SerializedKeypair mOperationalKey;
         uint8_t mRootCert[kMaxChipCertSize];
         uint8_t mOperationalCert[kMaxChipCertSize];
+
+        char mFabricLabel[kFabricLabelMaxLengthInBytes + 1] = { '\0' };
     };
 };
 

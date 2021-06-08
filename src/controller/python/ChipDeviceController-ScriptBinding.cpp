@@ -53,6 +53,7 @@
 #include <inet/IPAddress.h>
 #include <mdns/Resolver.h>
 #include <setup_payload/QRCodeSetupPayloadParser.h>
+#include <support/BytesToHex.h>
 #include <support/CHIPMem.h>
 #include <support/CodeUtils.h>
 #include <support/DLLUtil.h>
@@ -143,7 +144,7 @@ CHIP_ERROR pychip_DeviceController_NewDeviceController(chip::Controller::DeviceC
         localDeviceId = kDefaultLocalDeviceId;
     }
 
-    ReturnErrorOnFailure(sOperationalCredentialsIssuer.Initialize());
+    ReturnErrorOnFailure(sOperationalCredentialsIssuer.Initialize(sStorageDelegate));
 
     initParams.storageDelegate                = &sStorageDelegate;
     initParams.mDeviceAddressUpdateDelegate   = &sDeviceAddressUpdateDelegate;
@@ -254,11 +255,21 @@ void pychip_DeviceController_PrintDiscoveredDevices(chip::Controller::DeviceComm
         {
             continue;
         }
+        char rotatingId[chip::Mdns::kMaxRotatingIdLen * 2 + 1] = "";
+        Encoding::BytesToUppercaseHexString(dnsSdInfo->rotatingId, dnsSdInfo->rotatingIdLen, rotatingId, sizeof(rotatingId));
+
         ChipLogProgress(Discovery, "Device %d", i);
         ChipLogProgress(Discovery, "\tHost name:\t\t%s", dnsSdInfo->hostName);
         ChipLogProgress(Discovery, "\tLong discriminator:\t%u", dnsSdInfo->longDiscriminator);
         ChipLogProgress(Discovery, "\tVendor ID:\t\t%u", dnsSdInfo->vendorId);
         ChipLogProgress(Discovery, "\tProduct ID:\t\t%u", dnsSdInfo->productId);
+        ChipLogProgress(Discovery, "\tAdditional Pairing\t%u", dnsSdInfo->additionalPairing);
+        ChipLogProgress(Discovery, "\tCommissioning Mode\t%u", dnsSdInfo->commissioningMode);
+        ChipLogProgress(Discovery, "\tDevice Type\t\t%u", dnsSdInfo->deviceType);
+        ChipLogProgress(Discovery, "\tDevice Name\t\t%s", dnsSdInfo->deviceName);
+        ChipLogProgress(Discovery, "\tRotating Id\t\t%s", rotatingId);
+        ChipLogProgress(Discovery, "\tPairing Instruction\t%s", dnsSdInfo->pairingInstruction);
+        ChipLogProgress(Discovery, "\tPairing Hint\t\t0x%x", dnsSdInfo->pairingHint);
         for (int j = 0; j < dnsSdInfo->numIPs; ++j)
         {
             char buf[chip::Inet::kMaxIPAddressStringLength];
@@ -359,8 +370,7 @@ CHIP_ERROR pychip_DeviceCommissioner_CloseBleConnection(chip::Controller::Device
 
 uint64_t pychip_GetCommandSenderHandle(chip::Controller::Device * device)
 {
-    chip::app::CommandSender * sender = device->GetCommandSender();
-    return sender == nullptr ? 0 : reinterpret_cast<uint64_t>(sender);
+    return 0;
 }
 
 void pychip_Stack_SetLogFunct(LogMessageFunct logFunct)

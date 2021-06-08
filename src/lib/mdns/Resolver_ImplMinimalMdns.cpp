@@ -22,6 +22,7 @@
 #include "MinimalMdnsServer.h"
 #include "ServiceNaming.h"
 
+#include <mdns/TxtFields.h>
 #include <mdns/minimal/Parser.h>
 #include <mdns/minimal/QueryBuilder.h>
 #include <mdns/minimal/RecordData.h>
@@ -55,34 +56,9 @@ private:
     CommissionableNodeData * mNodeData;
 };
 
-bool IsKey(const mdns::Minimal::BytesRange key, const char * desired)
+const ByteSpan GetSpan(const mdns::Minimal::BytesRange & range)
 {
-    if (key.Size() != strlen(desired))
-    {
-        return false;
-    }
-    return memcmp(key.Start(), desired, key.Size()) == 0;
-}
-
-uint16_t MakeU16(const mdns::Minimal::BytesRange & val)
-{
-    uint32_t u32          = 0;
-    const uint16_t errval = 0x0;
-    for (size_t i = 0; i < val.Size(); ++i)
-    {
-        char c = static_cast<char>(val.Start()[i]);
-        if (c < '0' || c > '9')
-        {
-            return errval;
-        }
-        u32 = u32 * 10;
-        u32 += val.Start()[i] - static_cast<uint8_t>('0');
-        if (u32 > std::numeric_limits<uint16_t>::max())
-        {
-            return errval;
-        }
-    }
-    return static_cast<uint16_t>(u32);
+    return ByteSpan(range.Start(), range.Size());
 }
 
 void TxtRecordDelegateImpl::OnRecord(const mdns::Minimal::BytesRange & name, const mdns::Minimal::BytesRange & value)
@@ -91,33 +67,9 @@ void TxtRecordDelegateImpl::OnRecord(const mdns::Minimal::BytesRange & name, con
     {
         return;
     }
-
-    if (IsKey(name, "D"))
-    {
-        mNodeData->longDiscriminator = MakeU16(value);
-    }
-    else if (IsKey(name, "VP"))
-    {
-        // Fist value is the vendor id, second (after the +) is the product.
-        size_t plussign = value.Size();
-        for (size_t i = 0; i < value.Size(); ++i)
-        {
-            if (static_cast<char>(value.Start()[i]) == '+')
-            {
-                plussign = i;
-                break;
-            }
-        }
-        if (plussign > 0)
-        {
-            mNodeData->vendorId = MakeU16(mdns::Minimal::BytesRange(value.Start(), value.Start() + plussign));
-        }
-        if (plussign < value.Size() - 1)
-        {
-            mNodeData->productId = MakeU16(mdns::Minimal::BytesRange(value.Start() + plussign + 1, value.End()));
-        }
-    }
-    // TODO(cecille): Add the new stuff from 0.7 ballot 2.
+    ByteSpan key = GetSpan(name);
+    ByteSpan val = GetSpan(value);
+    FillNodeDataFromTxt(key, val, mNodeData);
 }
 
 constexpr size_t kMdnsMaxPacketSize = 1024;
@@ -366,14 +318,14 @@ public:
     CHIP_ERROR StartResolver(chip::Inet::InetLayer * inetLayer, uint16_t port) override;
     CHIP_ERROR SetResolverDelegate(ResolverDelegate * delegate) override;
     CHIP_ERROR ResolveNodeId(const PeerId & peerId, Inet::IPAddressType type) override;
-    CHIP_ERROR FindCommissionableNodes(CommissionableNodeFilter filter = CommissionableNodeFilter()) override;
+    CHIP_ERROR FindCommissionableNodes(DiscoveryFilter filter = DiscoveryFilter()) override;
 
 private:
     ResolverDelegate * mDelegate = nullptr;
     DiscoveryType mDiscoveryType = DiscoveryType::kUnknown;
 
     CHIP_ERROR SendQuery(mdns::Minimal::FullQName qname, mdns::Minimal::QType type);
-    CHIP_ERROR BrowseNodes(DiscoveryType type, CommissionableNodeFilter subtype);
+    CHIP_ERROR BrowseNodes(DiscoveryType type, DiscoveryFilter subtype);
     template <typename... Args>
     mdns::Minimal::FullQName CheckAndAllocateQName(Args &&... parts)
     {
@@ -446,47 +398,34 @@ CHIP_ERROR MinMdnsResolver::SendQuery(mdns::Minimal::FullQName qname, mdns::Mini
     return GlobalMinimalMdnsServer::Server().BroadcastSend(builder.ReleasePacket(), kMdnsPort);
 }
 
-CHIP_ERROR MinMdnsResolver::FindCommissionableNodes(CommissionableNodeFilter filter)
+CHIP_ERROR MinMdnsResolver::FindCommissionableNodes(DiscoveryFilter filter)
 {
     return BrowseNodes(DiscoveryType::kCommissionableNode, filter);
 }
 
 // TODO(cecille): Extend filter and use this for Resolve
-CHIP_ERROR MinMdnsResolver::BrowseNodes(DiscoveryType type, CommissionableNodeFilter filter)
+CHIP_ERROR MinMdnsResolver::BrowseNodes(DiscoveryType type, DiscoveryFilter filter)
 {
-    mDiscoveryType    = type;
-    char subtypeStr[] = "_Xdddddd";
+    mDiscoveryType = type;
 
     mdns::Minimal::FullQName qname;
-
-    switch (filter.type)
-    {
-    case CommissionableNodeFilterType::kShort:
-        snprintf(subtypeStr, strlen(subtypeStr), "_S%03u", filter.code);
-        break;
-    case CommissionableNodeFilterType::kLong:
-        snprintf(subtypeStr, strlen(subtypeStr), "_L%04u", filter.code);
-        break;
-    case CommissionableNodeFilterType::kVendor:
-        snprintf(subtypeStr, strlen(subtypeStr), "_V%03u", filter.code);
-        break;
-    case CommissionableNodeFilterType::kNone:
-        break;
-    }
 
     switch (type)
     {
     case DiscoveryType::kOperational:
-        qname = CheckAndAllocateQName("_chip", "_tcp", "local");
+        qname = CheckAndAllocateQName(kOperationalServiceName, kOperationalProtocol, kLocalDomain);
         break;
     case DiscoveryType::kCommissionableNode:
-        if (filter.type == CommissionableNodeFilterType::kNone)
+        if (filter.type == DiscoveryFilterType::kNone)
         {
-            qname = CheckAndAllocateQName("_chipc", "_udp", "local");
+            qname = CheckAndAllocateQName(kCommissionableServiceName, kCommissionProtocol, kLocalDomain);
         }
         else
         {
-            qname = CheckAndAllocateQName(subtypeStr, "_sub", "_chipc", "_udp", "local");
+            char subtypeStr[kMaxSubtypeDescSize];
+            ReturnErrorOnFailure(MakeServiceSubtype(subtypeStr, sizeof(subtypeStr), filter));
+            qname = CheckAndAllocateQName(subtypeStr, kSubtypeServiceNamePart, kCommissionableServiceName, kCommissionProtocol,
+                                          kLocalDomain);
         }
         break;
     case DiscoveryType::kUnknown:
@@ -515,13 +454,13 @@ CHIP_ERROR MinMdnsResolver::ResolveNodeId(const PeerId & peerId, Inet::IPAddress
         // Node and fabricid are encoded in server names.
         ReturnErrorOnFailure(MakeInstanceName(nameBuffer, sizeof(nameBuffer), peerId));
 
-        const char * instanceQName[] = { nameBuffer, "_chip", "_tcp", "local" };
+        const char * instanceQName[] = { nameBuffer, kOperationalServiceName, kOperationalProtocol, kLocalDomain };
         Query query(instanceQName);
 
         query
-            .SetClass(QClass::IN)      //
-            .SetType(QType::ANY)       //
-            .SetAnswerViaUnicast(true) //
+            .SetClass(QClass::IN)       //
+            .SetType(QType::ANY)        //
+            .SetAnswerViaUnicast(false) //
             ;
 
         // NOTE: type above is NOT A or AAAA because the name searched for is
