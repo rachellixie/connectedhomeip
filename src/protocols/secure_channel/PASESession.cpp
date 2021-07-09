@@ -328,8 +328,9 @@ void PASESession::OnResponseTimeout(ExchangeContext * ec)
     VerifyOrReturn(ec != nullptr, ChipLogError(SecureChannel, "PASESession::OnResponseTimeout was called by null exchange"));
     VerifyOrReturn(mExchangeCtxt == nullptr || mExchangeCtxt == ec,
                    ChipLogError(SecureChannel, "PASESession::OnResponseTimeout exchange doesn't match"));
-    ChipLogError(SecureChannel, "PASESession timed out while waiting for a response from the peer. Expected message type was %d",
-                 mNextExpectedMsg);
+    ChipLogError(SecureChannel,
+                 "PASESession timed out while waiting for a response from the peer. Expected message type was %" PRIu8,
+                 static_cast<std::underlying_type_t<decltype(mNextExpectedMsg)>>(mNextExpectedMsg));
     mDelegate->OnSessionEstablishmentError(CHIP_ERROR_TIMEOUT);
     Clear();
 }
@@ -344,7 +345,7 @@ CHIP_ERROR PASESession::DeriveSecureSession(SecureSession & session, SecureSessi
 CHIP_ERROR PASESession::SendPBKDFParamRequest()
 {
     System::PacketBufferHandle req = System::PacketBufferHandle::New(kPBKDFParamRandomNumberSize);
-    VerifyOrReturnError(!req.IsNull(), CHIP_SYSTEM_ERROR_NO_MEMORY);
+    VerifyOrReturnError(!req.IsNull(), CHIP_ERROR_NO_MEMORY);
 
     ReturnErrorOnFailure(DRBG_get_bytes(req->Start(), kPBKDFParamRandomNumberSize));
 
@@ -403,7 +404,7 @@ CHIP_ERROR PASESession::SendPBKDFParamResponse()
     uint8_t * msg = nullptr;
 
     resp = System::PacketBufferHandle::New(resplen);
-    VerifyOrReturnError(!resp.IsNull(), CHIP_SYSTEM_ERROR_NO_MEMORY);
+    VerifyOrReturnError(!resp.IsNull(), CHIP_ERROR_NO_MEMORY);
 
     msg = resp->Start();
 
@@ -495,7 +496,7 @@ CHIP_ERROR PASESession::SendMsg1()
     ReturnErrorOnFailure(mSpake2p.ComputeRoundOne(NULL, 0, X, &X_len));
 
     Encoding::LittleEndian::PacketBufferWriter bbuf(System::PacketBufferHandle::New(sizeof(uint16_t) + X_len));
-    VerifyOrReturnError(!bbuf.IsNull(), CHIP_SYSTEM_ERROR_NO_MEMORY);
+    VerifyOrReturnError(!bbuf.IsNull(), CHIP_ERROR_NO_MEMORY);
     bbuf.Put16(mConnectionState.GetLocalKeyID());
     bbuf.Put(&X[0], X_len);
     VerifyOrReturnError(bbuf.Fit(), CHIP_ERROR_NO_MEMORY);
@@ -555,7 +556,7 @@ CHIP_ERROR PASESession::HandleMsg1_and_SendMsg2(const System::PacketBufferHandle
 
     {
         Encoding::LittleEndian::PacketBufferWriter bbuf(System::PacketBufferHandle::New(data_len));
-        VerifyOrExit(!bbuf.IsNull(), err = CHIP_SYSTEM_ERROR_NO_MEMORY);
+        VerifyOrExit(!bbuf.IsNull(), err = CHIP_ERROR_NO_MEMORY);
         bbuf.Put16(mConnectionState.GetLocalKeyID());
         bbuf.Put(&Y[0], Y_len);
         bbuf.Put(verifier, verifier_len);
@@ -617,20 +618,6 @@ CHIP_ERROR PASESession::HandleMsg2_and_SendMsg3(const System::PacketBufferHandle
     verifier_len = static_cast<uint16_t>(verifier_len_raw);
 
     {
-        Encoding::PacketBufferWriter bbuf(System::PacketBufferHandle::New(verifier_len));
-        VerifyOrExit(!bbuf.IsNull(), err = CHIP_SYSTEM_ERROR_NO_MEMORY);
-
-        bbuf.Put(verifier, verifier_len);
-        VerifyOrExit(bbuf.Fit(), err = CHIP_ERROR_NO_MEMORY);
-
-        // Call delegate to send the Msg3 to peer
-        err = mExchangeCtxt->SendMessage(Protocols::SecureChannel::MsgType::PASE_Spake2p3, bbuf.Finalize());
-        SuccessOrExit(err);
-    }
-
-    ChipLogDetail(SecureChannel, "Sent spake2p msg3");
-
-    {
         const uint8_t * hash = &buf[kMAX_Point_Length];
         err                  = mSpake2p.KeyConfirm(hash, kMAX_Hash_Length);
         if (err != CHIP_NO_ERROR)
@@ -642,6 +629,20 @@ CHIP_ERROR PASESession::HandleMsg2_and_SendMsg3(const System::PacketBufferHandle
         err = mSpake2p.GetKeys(mKe, &mKeLen);
         SuccessOrExit(err);
     }
+
+    {
+        Encoding::PacketBufferWriter bbuf(System::PacketBufferHandle::New(verifier_len));
+        VerifyOrExit(!bbuf.IsNull(), err = CHIP_ERROR_NO_MEMORY);
+
+        bbuf.Put(verifier, verifier_len);
+        VerifyOrExit(bbuf.Fit(), err = CHIP_ERROR_NO_MEMORY);
+
+        // Call delegate to send the Msg3 to peer
+        err = mExchangeCtxt->SendMessage(Protocols::SecureChannel::MsgType::PASE_Spake2p3, bbuf.Finalize());
+        SuccessOrExit(err);
+    }
+
+    ChipLogDetail(SecureChannel, "Sent spake2p msg3");
 
     mPairingComplete = true;
 
@@ -782,8 +783,8 @@ CHIP_ERROR PASESession::ValidateReceivedMessage(ExchangeContext * exchange, cons
     return CHIP_NO_ERROR;
 }
 
-void PASESession::OnMessageReceived(ExchangeContext * exchange, const PacketHeader & packetHeader,
-                                    const PayloadHeader & payloadHeader, System::PacketBufferHandle && msg)
+CHIP_ERROR PASESession::OnMessageReceived(ExchangeContext * exchange, const PacketHeader & packetHeader,
+                                          const PayloadHeader & payloadHeader, System::PacketBufferHandle && msg)
 {
     CHIP_ERROR err = ValidateReceivedMessage(exchange, packetHeader, payloadHeader, std::move(msg));
     SuccessOrExit(err);
@@ -830,6 +831,7 @@ exit:
         ChipLogError(SecureChannel, "Failed during PASE session setup. %s", ErrorStr(err));
         mDelegate->OnSessionEstablishmentError(err);
     }
+    return err;
 }
 
 } // namespace chip

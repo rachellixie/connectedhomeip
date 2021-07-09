@@ -100,8 +100,8 @@ private:
 class MockAppDelegate : public Messaging::ExchangeDelegate
 {
 public:
-    void OnMessageReceived(Messaging::ExchangeContext * ec, const PacketHeader & packetHeader, const PayloadHeader & payloadHeader,
-                           System::PacketBufferHandle && buffer) override
+    CHIP_ERROR OnMessageReceived(Messaging::ExchangeContext * ec, const PacketHeader & packetHeader,
+                                 const PayloadHeader & payloadHeader, System::PacketBufferHandle && buffer) override
     {
         uint32_t respTime    = System::Timer::GetCurrentEpoch();
         uint32_t transitTime = respTime - gSendArguments.GetLastSendTime();
@@ -112,6 +112,7 @@ public:
 
         gExchangeCtx->Close();
         gExchangeCtx = nullptr;
+        return CHIP_NO_ERROR;
     }
 
     void OnResponseTimeout(Messaging::ExchangeContext * ec) override
@@ -130,8 +131,7 @@ CHIP_ERROR SendMessage(streamer_t * stream)
 
     Messaging::SendFlags sendFlags;
     System::PacketBufferHandle payloadBuf;
-    char * requestData = nullptr;
-    uint32_t size      = 0;
+    uint32_t payloadSize = gSendArguments.GetPayloadSize();
 
     // Discard any existing exchange context. Effectively we can only have one exchange with
     // a single node at any one time.
@@ -145,15 +145,11 @@ CHIP_ERROR SendMessage(streamer_t * stream)
     gExchangeCtx = gExchangeManager.NewContext({ kTestDeviceNodeId, 0, gAdminId }, &gMockAppDelegate);
     VerifyOrExit(gExchangeCtx != nullptr, err = CHIP_ERROR_NO_MEMORY);
 
-    size = gSendArguments.GetPayloadSize();
-    VerifyOrExit(size <= kMaxPayloadSize, err = CHIP_ERROR_INVALID_MESSAGE_LENGTH);
-
-    requestData = static_cast<char *>(chip::Platform::MemoryAlloc(size));
-    VerifyOrExit(requestData != nullptr, err = CHIP_ERROR_NO_MEMORY);
-
-    snprintf(requestData, size, "CHIP Message");
-    payloadBuf = MessagePacketBuffer::NewWithData(requestData, size);
+    payloadBuf = MessagePacketBuffer::New(payloadSize);
     VerifyOrExit(!payloadBuf.IsNull(), err = CHIP_ERROR_NO_MEMORY);
+
+    memset(payloadBuf->Start(), 0, payloadSize);
+    payloadBuf->SetDataLength(payloadSize);
 
     if (gSendArguments.IsUsingMRP())
     {
@@ -169,7 +165,8 @@ CHIP_ERROR SendMessage(streamer_t * stream)
 
     gSendArguments.SetLastSendTime(System::Timer::GetCurrentEpoch());
 
-    streamer_printf(stream, "\nSend CHIP message with payload size: %d bytes to Node: %" PRIu64 "\n", size, kTestDeviceNodeId);
+    streamer_printf(stream, "\nSend CHIP message with payload size: %d bytes to Node: %" PRIu64 "\n", payloadSize,
+                    kTestDeviceNodeId);
 
     err = gExchangeCtx->SendMessage(Protocols::Id(VendorId::Common, gSendArguments.GetProtocolId()),
                                     gSendArguments.GetMessageType(), std::move(payloadBuf), sendFlags);
@@ -181,11 +178,6 @@ CHIP_ERROR SendMessage(streamer_t * stream)
     }
 
 exit:
-    if (requestData != nullptr)
-    {
-        chip::Platform::MemoryFree(requestData);
-    }
-
     if (err != CHIP_NO_ERROR)
     {
         streamer_printf(stream, "Send CHIP message failed, err: %s\n", ErrorStr(err));
@@ -317,13 +309,12 @@ void PrintUsage(streamer_t * stream)
     streamer_printf(stream, "  -T  <type>      message type\n");
     streamer_printf(stream, "  -p  <port>      server port number\n");
     streamer_printf(stream, "  -r  <1|0>       enable or disable MRP\n");
-    streamer_printf(stream, "  -s  <size>      payload size in bytes\n");
+    streamer_printf(stream, "  -s  <size>      application payload size in bytes\n");
 }
 
-int cmd_send(int argc, char ** argv)
+CHIP_ERROR cmd_send(int argc, char ** argv)
 {
     streamer_t * sout = streamer_get();
-    int ret           = 0;
     int optIndex      = 0;
 
     gSendArguments.Reset();
@@ -334,7 +325,7 @@ int cmd_send(int argc, char ** argv)
         {
         case 'h':
             PrintUsage(sout);
-            return 0;
+            return CHIP_NO_ERROR;
 #if INET_CONFIG_ENABLE_TCP_ENDPOINT
         case 'u':
             gSendArguments.SetUsingTCP(false);
@@ -347,7 +338,7 @@ int cmd_send(int argc, char ** argv)
             if (++optIndex >= argc || argv[optIndex][0] == '-')
             {
                 streamer_printf(sout, "Invalid argument specified for -P\n");
-                return -1;
+                return CHIP_ERROR_INVALID_ARGUMENT;
             }
             else
             {
@@ -358,7 +349,7 @@ int cmd_send(int argc, char ** argv)
             if (++optIndex >= argc || argv[optIndex][0] == '-')
             {
                 streamer_printf(sout, "Invalid argument specified for -T\n");
-                return -1;
+                return CHIP_ERROR_INVALID_ARGUMENT;
             }
             else
             {
@@ -369,7 +360,7 @@ int cmd_send(int argc, char ** argv)
             if (++optIndex >= argc || argv[optIndex][0] == '-')
             {
                 streamer_printf(sout, "Invalid argument specified for -p\n");
-                return -1;
+                return CHIP_ERROR_INVALID_ARGUMENT;
             }
             else
             {
@@ -380,7 +371,7 @@ int cmd_send(int argc, char ** argv)
             if (++optIndex >= argc || argv[optIndex][0] == '-')
             {
                 streamer_printf(sout, "Invalid argument specified for -s\n");
-                return -1;
+                return CHIP_ERROR_INVALID_ARGUMENT;
             }
             else
             {
@@ -391,7 +382,7 @@ int cmd_send(int argc, char ** argv)
             if (++optIndex >= argc || argv[optIndex][0] == '-')
             {
                 streamer_printf(sout, "Invalid argument specified for -r\n");
-                return -1;
+                return CHIP_ERROR_INVALID_ARGUMENT;
             }
             else
             {
@@ -407,12 +398,12 @@ int cmd_send(int argc, char ** argv)
                 }
                 else
                 {
-                    ret = -1;
+                    return CHIP_ERROR_INVALID_ARGUMENT;
                 }
             }
             break;
         default:
-            ret = -1;
+            return CHIP_ERROR_INVALID_ARGUMENT;
         }
 
         optIndex++;
@@ -421,16 +412,13 @@ int cmd_send(int argc, char ** argv)
     if (optIndex >= argc)
     {
         streamer_printf(sout, "Missing IP address\n");
-        ret = -1;
+        return CHIP_ERROR_INVALID_ARGUMENT;
     }
 
-    if (ret == 0)
-    {
-        streamer_printf(sout, "IP address: %s\n", argv[optIndex]);
-        ProcessCommand(sout, argv[optIndex]);
-    }
+    streamer_printf(sout, "IP address: %s\n", argv[optIndex]);
+    ProcessCommand(sout, argv[optIndex]);
 
-    return ret;
+    return CHIP_NO_ERROR;
 }
 
 } // namespace
