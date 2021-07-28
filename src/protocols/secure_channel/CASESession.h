@@ -59,6 +59,10 @@ constexpr uint16_t kIPKSize = 16;
 #define CASE_EPHEMERAL_KEY 0xCA5EECD0
 #endif
 
+#ifdef ENABLE_HSM_CASE_EPHERMAL_KEY
+#define CASE_EPHEMERAL_KEY 0xCA5EECD0
+#endif
+
 struct CASESessionSerialized;
 
 struct CASESessionSerializable
@@ -251,8 +255,9 @@ private:
 
     Protocols::SecureChannel::MsgType mNextExpectedMsg = Protocols::SecureChannel::MsgType::CASE_SigmaErr;
 
-    Crypto::Hash_SHA256_stream mCommissioningHash;
-    Crypto::P256PublicKey mRemotePubKey;
+    Hash_SHA256_stream mCommissioningHash;
+    P256PublicKey mRemotePubKey;
+
 #ifdef ENABLE_HSM_CASE_EPHERMAL_KEY
     Crypto::P256KeypairHSM mEphemeralKey;
 #else
